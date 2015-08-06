@@ -17,7 +17,7 @@ package com.jaguarlandrover.rvi;
 import android.test.AndroidTestCase;
 import android.util.Log;
 
-public class DlinkPacketParserTest extends AndroidTestCase implements DlinkPacketParser.RVIDataParserTestCaseListener, DlinkPacketParser.RVIDataParserListener
+public class DlinkPacketParserTest extends AndroidTestCase implements DlinkPacketParser.DlinkPacketParserTestCaseListener, DlinkPacketParser.DlinkPacketParserListener
 {
     private final static String TAG = "RVI:DlinkPacketP...Test";
 

@@ -30,12 +30,12 @@ public class VehicleApplication
 
     private ArrayList<VehicleService> mServices;
 
-    public interface RVIAppListener
+    public interface VehicleApplicationListener
     {
         public void onServiceUpdated(VehicleService service);
     }
 
-    private RVIAppListener mListener;
+    private VehicleApplicationListener mListener;
 
     public VehicleApplication(Context context, String appIdentifier, String domain, String remotePrefix, ArrayList<String> services) {
         mAppIdentifier = appIdentifier;
@@ -99,11 +99,11 @@ public class VehicleApplication
     }
 
 
-    public RVIAppListener getListener() {
+    public VehicleApplicationListener getListener() {
         return mListener;
     }
 
-    public void setListener(RVIAppListener listener) {
+    public void setListener(VehicleApplicationListener listener) {
         mListener = listener;
     }
 

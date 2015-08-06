@@ -21,29 +21,29 @@ public class DlinkPacketParser
 {
     private final static String TAG = "RVI:DlinkPacketParser";
 
-    private String mBuffer;
-    private RVIDataParserListener mDataParserListener;
+    private String                    mBuffer;
+    private DlinkPacketParserListener mDataParserListener;
 
-    public interface RVIDataParserListener
+    public interface DlinkPacketParserListener
     {
         void onPacketParsed(DlinkPacket packet);
     }
 
-    public interface RVIDataParserTestCaseListener
+    public interface DlinkPacketParserTestCaseListener
     {
         void onJsonStringParsed(String jsonString);
 
         void onJsonObjectParsed(Object jsonObject);
     }
 
-    public DlinkPacketParser(RVIDataParserListener listener) {
+    public DlinkPacketParser(DlinkPacketParserListener listener) {
         mDataParserListener = listener;
     }
 
     /**
      *
      * @param  buffer String to parse out JSON objects from
-     * @return        The length of the first JSON object found, 0 if it is an incomplete object,
+     * @return The length of the first JSON object found, 0 if it is an incomplete object,
      *                -1 if the string does not start with a '{' or an '['
      */
     private int getLengthOfJsonObject(String buffer) {
@@ -68,8 +68,8 @@ public class DlinkPacketParser
     private DlinkPacket stringToPacket(String string) {
         Log.d(TAG, "Received packet: " + string);
 
-        if (mDataParserListener instanceof RVIDataParserTestCaseListener)
-            ((RVIDataParserTestCaseListener) mDataParserListener).onJsonStringParsed(string);
+        if (mDataParserListener instanceof DlinkPacketParserTestCaseListener)
+            ((DlinkPacketParserTestCaseListener) mDataParserListener).onJsonStringParsed(string);
 
         Gson gson = new Gson();
         DlinkPacket packet;
@@ -81,8 +81,8 @@ public class DlinkPacketParser
             return null;
         }
 
-        if (mDataParserListener instanceof RVIDataParserTestCaseListener)
-            ((RVIDataParserTestCaseListener) mDataParserListener).onJsonObjectParsed(packet);
+        if (mDataParserListener instanceof DlinkPacketParserTestCaseListener)
+            ((DlinkPacketParserTestCaseListener) mDataParserListener).onJsonObjectParsed(packet);
 
         DlinkPacket.Command command = packet.mCmd;
 

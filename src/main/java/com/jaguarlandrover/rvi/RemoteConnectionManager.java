@@ -16,7 +16,7 @@ package com.jaguarlandrover.rvi;
 
 import android.util.Log;
 
-public class RemoteConnectionManager implements RemoteConnectionInterface.RemoteConnectionListener, DlinkPacketParser.RVIDataParserListener
+public class RemoteConnectionManager implements RemoteConnectionInterface.RemoteConnectionListener, DlinkPacketParser.DlinkPacketParserListener
 {
     private final static String TAG = "RVI:RemoteCon...Manager";
 

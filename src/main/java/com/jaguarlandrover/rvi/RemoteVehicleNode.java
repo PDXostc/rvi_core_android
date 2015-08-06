@@ -37,25 +37,25 @@ public class RemoteVehicleNode implements RemoteConnectionManagerListener
 
     private static HashSet<VehicleApplication> allApps = new HashSet<>();
 
-    public static RVINodeListener getListener() {
+    public static RemoteVehicleNodeListener getListener() {
         return ourInstance.mListener;
     }
 
-    public static void setListener(RVINodeListener listener) {
+    public static void setListener(RemoteVehicleNodeListener listener) {
         ourInstance.mListener = listener;
     }
 
-    public interface RVINodeListener
+    public interface RemoteVehicleNodeListener
     {
-        public void rviNodeDidConnect();
+        public void nodeDidConnect();
 
-        public void rviNodeDidFailToConnect();
+        public void nodeDidFailToConnect();
 
-        public void rviNodeDidDisconnect();
+        public void nodeDidDisconnect();
 
     }
 
-    private RVINodeListener mListener;
+    private RemoteVehicleNodeListener mListener;
 
     public static void connect() {
         // are we configured
@@ -96,17 +96,17 @@ public class RemoteVehicleNode implements RemoteConnectionManagerListener
 
         announceServices();
 
-        mListener.rviNodeDidConnect();
+        mListener.nodeDidConnect();
     }
 
     @Override
     public void onRVIDidFailToConnect(Error error) {
-        mListener.rviNodeDidFailToConnect();
+        mListener.nodeDidFailToConnect();
     }
 
     @Override
     public void onRVIDidDisconnect() {
-        mListener.rviNodeDidDisconnect();
+        mListener.nodeDidDisconnect();
     }
 
     @Override
