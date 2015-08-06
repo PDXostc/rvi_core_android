@@ -98,7 +98,6 @@ public class VehicleApplication
             service.setRemotePrefix(remotePrefix);
     }
 
-
     public VehicleApplicationListener getListener() {
         return mListener;
     }

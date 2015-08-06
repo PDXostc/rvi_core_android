@@ -22,9 +22,9 @@ public class RemoteConnectionManager implements RemoteConnectionInterface.Remote
 
     private static RemoteConnectionManager ourInstance = new RemoteConnectionManager();
 
-    private boolean mUsingProxyServer;
+    //private boolean mUsingProxyServer;
 
-    private ServerConnection    mProxyServerConnection;
+    //private ServerConnection    mProxyServerConnection;
     private BluetoothConnection mBluetoothConnection;
     private ServerConnection    mDirectServerConnection;
 
@@ -35,7 +35,7 @@ public class RemoteConnectionManager implements RemoteConnectionInterface.Remote
     private RemoteConnectionManager() {
         mDataParser = new DlinkPacketParser(this);
 
-        mProxyServerConnection = new ServerConnection();
+        //mProxyServerConnection = new ServerConnection();
         mBluetoothConnection = new BluetoothConnection();
         mDirectServerConnection = new ServerConnection();
     }
@@ -70,10 +70,10 @@ public class RemoteConnectionManager implements RemoteConnectionInterface.Remote
     }
 
     private RemoteConnectionInterface selectConnectedRemoteConnection() {
-        if (mDirectServerConnection.isEnabled() && mDirectServerConnection.isConnected() && !mUsingProxyServer)
+        if (mDirectServerConnection.isEnabled() && mDirectServerConnection.isConnected())// && !mUsingProxyServer)
             return mDirectServerConnection;
-        if (mProxyServerConnection.isEnabled() && mProxyServerConnection.isConnected() && mUsingProxyServer)
-            return mProxyServerConnection;
+//        if (mProxyServerConnection.isEnabled() && mProxyServerConnection.isConnected() && mUsingProxyServer)
+//            return mProxyServerConnection;
         if (mBluetoothConnection.isEnabled() && mBluetoothConnection.isConnected()) {
             return mBluetoothConnection;
         }
@@ -82,10 +82,10 @@ public class RemoteConnectionManager implements RemoteConnectionInterface.Remote
     }
 
     private RemoteConnectionInterface selectEnabledRemoteConnection() { // TODO: This is going to be buggy if a connection is enabled but not connected; the other connections won't have connected
-        if (mDirectServerConnection.isEnabled() && !mUsingProxyServer)     // TODO: Rewrite better 'chosing' code
+        if (mDirectServerConnection.isEnabled())// && !mUsingProxyServer)     // TODO: Rewrite better 'chosing' code
             return mDirectServerConnection;
-        if (mProxyServerConnection.isEnabled() && mUsingProxyServer)
-            return mProxyServerConnection;
+//        if (mProxyServerConnection.isEnabled() && mUsingProxyServer)
+//            return mProxyServerConnection;
         if (mBluetoothConnection.isEnabled()) {
             return mBluetoothConnection;
         }
@@ -95,7 +95,7 @@ public class RemoteConnectionManager implements RemoteConnectionInterface.Remote
 
     private void closeConnections() {
         mDirectServerConnection.disconnect();
-        mProxyServerConnection.disconnect();
+        //mProxyServerConnection.disconnect();
         mBluetoothConnection.disconnect();
     }
 
@@ -137,17 +137,17 @@ public class RemoteConnectionManager implements RemoteConnectionInterface.Remote
         RemoteConnectionManager.ourInstance.mDirectServerConnection.setServerPort(serverPort);
     }
 
-    public static void setProxyServerUrl(String proxyServerUrl) {
-        RemoteConnectionManager.ourInstance.mProxyServerConnection.setServerUrl(proxyServerUrl);
-    }
-
-    public static void setProxyServerPort(Integer proxyServerPort) {
-        RemoteConnectionManager.ourInstance.mProxyServerConnection.setServerPort(proxyServerPort);
-    }
-
-    public static void setUsingProxyServer(boolean usingProxyServer) {
-        RemoteConnectionManager.ourInstance.mUsingProxyServer = usingProxyServer;
-    }
+//    public static void setProxyServerUrl(String proxyServerUrl) {
+//        RemoteConnectionManager.ourInstance.mProxyServerConnection.setServerUrl(proxyServerUrl);
+//    }
+//
+//    public static void setProxyServerPort(Integer proxyServerPort) {
+//        RemoteConnectionManager.ourInstance.mProxyServerConnection.setServerPort(proxyServerPort);
+//    }
+//
+//    public static void setUsingProxyServer(boolean usingProxyServer) {
+//        RemoteConnectionManager.ourInstance.mUsingProxyServer = usingProxyServer;
+//    }
 
     public static RemoteConnectionManagerListener getListener() {
         return RemoteConnectionManager.ourInstance.mListener;
