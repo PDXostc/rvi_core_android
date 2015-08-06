@@ -18,7 +18,7 @@ import android.util.Log;
 
 public class RemoteConnectionManager implements RemoteConnectionInterface.RemoteConnectionListener, DlinkPacketParser.RVIDataParserListener
 {
-    private final static String TAG = "RVI:RVIRemoteCo...";
+    private final static String TAG = "RVI:RemoteCon...Manager";
 
     private static RemoteConnectionManager ourInstance = new RemoteConnectionManager();
 

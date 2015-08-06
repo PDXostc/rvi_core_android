@@ -14,6 +14,7 @@ package com.jaguarlandrover.rvi;
  *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+import android.util.Log;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
@@ -21,7 +22,7 @@ import java.util.HashMap;
 
 public class DlinkServiceAnnouncePacket extends DlinkPacket
 {
-    private final static String TAG = "RVI:DlinkServiceAnnouncePacket";
+    private final static String TAG = "RVI:DlinkServi...Packet";
 
     @SerializedName("stat")
     private String mStatus;

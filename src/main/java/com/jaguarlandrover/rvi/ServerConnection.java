@@ -26,7 +26,7 @@ import java.net.UnknownHostException;
 
 public class ServerConnection implements RemoteConnectionInterface
 {
-    private final static String TAG = "RVI:RVIServerCo...";
+    private final static String TAG = "RVI:ServerConnection";
     private RemoteConnectionListener mRemoteConnectionListener;
 
     private String  mServerUrl;
