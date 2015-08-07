@@ -46,13 +46,13 @@ public class DlinkAuthPacket extends DlinkPacket
         mCert = "";
     }
 
-    public DlinkAuthPacket(HashMap jsonHash) {
-        super(Command.AUTHORIZE, jsonHash);
-
-        mAddr = (String)  jsonHash.get("addr");
-        mPort = ((Double) jsonHash.get("port")).intValue();
-        mVer  = (String)  jsonHash.get("ver");
-        mCert = (String)  jsonHash.get("cert");
-    }
+//    public DlinkAuthPacket(HashMap jsonHash) {
+//        super(Command.AUTHORIZE, jsonHash);
+//
+//        mAddr = (String)  jsonHash.get("addr");
+//        mPort = ((Double) jsonHash.get("port")).intValue();
+//        mVer  = (String)  jsonHash.get("ver");
+//        mCert = (String)  jsonHash.get("cert");
+//    }
 
 }

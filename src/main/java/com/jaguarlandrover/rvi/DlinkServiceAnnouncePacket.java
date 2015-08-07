@@ -30,7 +30,7 @@ public class DlinkServiceAnnouncePacket extends DlinkPacket
     @SerializedName("svcs")
     private ArrayList<String> mServices;
 
-    ArrayList<String> getServiceFQNames(ArrayList<VehicleService> services) {
+    private ArrayList<String> getServiceFQNames(ArrayList<VehicleService> services) {
         ArrayList<String> newList = new ArrayList<>(services.size());
         for (VehicleService service : services)
             newList.add(service.getFullyQualifiedLocalServiceName());
@@ -54,11 +54,15 @@ public class DlinkServiceAnnouncePacket extends DlinkPacket
         mServices = getServiceFQNames(services);
     }
 
-    public DlinkServiceAnnouncePacket(HashMap jsonHash) {
-        super(Command.SERVICE_ANNOUNCE, jsonHash);
-
-        mStatus   = (String) jsonHash.get("stat");
-        mServices = (ArrayList<String>) jsonHash.get("svcs");
+    public ArrayList<String> getServices() {
+        return mServices;
     }
+
+//    public DlinkServiceAnnouncePacket(HashMap jsonHash) {
+//        super(Command.SERVICE_ANNOUNCE, jsonHash);
+//
+//        mStatus   = (String) jsonHash.get("stat");
+//        mServices = (ArrayList<String>) jsonHash.get("svcs");
+//    }
 
 }

@@ -34,7 +34,9 @@ public class VehicleService
     private String mLocalPrefix;
     private String mRemotePrefix;
 
-    private Object mValue;
+    private Object mParameters;
+
+    private Long mTimeout;
 
     public VehicleService(String serviceIdentifier, String appIdentifier, String domain, String remotePrefix, String localPrefix) {
         mServiceIdentifier = serviceIdentifier;
@@ -63,15 +65,15 @@ public class VehicleService
 
         // TODO: Why are parameters arrays of object, not just an object?
 
-        mValue = parameters.get("value"); // TODO: This concept is HVAC specific; extract to an hvac-layer class
+        mParameters = parameters.get("value"); // TODO: This concept is HVAC specific; extract to an hvac-layer class
     }
 
-    public Object getValue() {
-        return mValue;
+    public Object getParameters() {
+        return mParameters;
     }
 
-    public void setValue(Object mValue) {
-        this.mValue = mValue;
+    public void setParameters(Object mValue) {
+        this.mParameters = mValue;
     }
 
     public String getServiceIdentifier() {
@@ -86,16 +88,16 @@ public class VehicleService
         return mDomain + mRemotePrefix + mAppIdentifier + mServiceIdentifier;
     }
 
+    public boolean hasRemotePrefix() {
+        return mRemotePrefix != null;
+    }
+
     public Object generateRequestParams() {
         HashMap<String, Object> params = new HashMap<>(4);
-        HashMap<String, Object> subParams = new HashMap<>(2);
-
-        subParams.put("sending_node", mDomain + mLocalPrefix + "/"); // TODO: This concept is HVAC specific; extract to an hvac-layer class
-        subParams.put("value", mValue);
 
         params.put("service", getFullyQualifiedRemoteServiceName());
-        params.put("parameters", Arrays.asList(subParams));
-        params.put("timeout", System.currentTimeMillis() + 5000);
+        params.put("parameters", Arrays.asList(mParameters));
+        params.put("timeout", mTimeout);
         params.put("signature", "signature");
         params.put("certificate", "certificate");
 
@@ -120,5 +122,13 @@ public class VehicleService
 
     public void setRemotePrefix(String remotePrefix) {
         mRemotePrefix = remotePrefix;
+    }
+
+    public Long getTimeout() {
+        return mTimeout;
+    }
+
+    public void setTimeout(Long timeout) {
+        mTimeout =  System.currentTimeMillis() + timeout;
     }
 }

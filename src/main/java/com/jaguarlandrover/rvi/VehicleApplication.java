@@ -17,6 +17,8 @@ package com.jaguarlandrover.rvi;
 import android.content.Context;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+
 
 public class VehicleApplication
 {
@@ -24,11 +26,11 @@ public class VehicleApplication
 
     private String mAppIdentifier;
     private String mDomain;
-    private String mRemotePrefix;
 
-    private String mLocalPrefix;
+//    private String mRemotePrefix;
+//    private String mLocalPrefix;
 
-    private ArrayList<VehicleService> mServices;
+    private HashMap<String, VehicleService> mServices;
 
     public interface VehicleApplicationListener
     {
@@ -37,47 +39,62 @@ public class VehicleApplication
 
     private VehicleApplicationListener mListener;
 
-    public VehicleApplication(Context context, String appIdentifier, String domain, String remotePrefix, ArrayList<String> services) {
+    public VehicleApplication(Context context, String appIdentifier, String domain, /*String remotePrefix,*/ ArrayList<String> servicesIdentifiers) {
         mAppIdentifier = appIdentifier;
         mDomain = domain;
-        mRemotePrefix = remotePrefix;
+        //mRemotePrefix = remotePrefix;
 
-        mLocalPrefix = RemoteVehicleNode.getLocalServicePrefix(context);
+        //mLocalPrefix = VehicleNode.getLocalServicePrefix(context);
         //"/android/" + UUID.randomUUID().toString();//987654321"; // TODO: Generate randomly
 
-        mServices = makeServices(services);
+        mServices = makeServices(servicesIdentifiers, VehicleNode.getLocalServicePrefix(context));
     }
 
-    private ArrayList<VehicleService> makeServices(ArrayList<String> serviceIdentifiers) {
-        ArrayList<VehicleService> services = new ArrayList<>(serviceIdentifiers.size());
+    private HashMap<String, VehicleService> makeServices(ArrayList<String> serviceIdentifiers, String localPrefix) {
+        HashMap<String, VehicleService> services = new HashMap<>(serviceIdentifiers.size());
         for (String serviceIdentifier : serviceIdentifiers)
-            services.add(makeService(serviceIdentifier));
+            services.put(serviceIdentifier, makeService(serviceIdentifier, localPrefix));
 
         return services;
     }
 
-    private VehicleService makeService(String serviceIdentifier) {
-        return new VehicleService(serviceIdentifier, mAppIdentifier, mDomain, mRemotePrefix, mLocalPrefix);
+    private VehicleService makeService(String serviceIdentifier, String localPrefix) {
+        return new VehicleService(serviceIdentifier, mAppIdentifier, mDomain, null, localPrefix);//mRemotePrefix, mLocalPrefix);
     }
 
     public VehicleService getService(String serviceIdentifier) {
-        for (VehicleService service : mServices)
-            if (service.getServiceIdentifier().equals(serviceIdentifier) || service.getServiceIdentifier()
-                                                                                   .equals("/" + serviceIdentifier))
-                return service;
+//        for (VehicleService service : mServices)
+//            if (service.getServiceIdentifier().equals(serviceIdentifier) || service.getServiceIdentifier()
+//                                                                                   .equals("/" + serviceIdentifier))
+//                return service;
 
-        return null;
+        VehicleService service;
+        if (null != (service = mServices.get(serviceIdentifier)))
+            return service;
+
+        if (null != (service = mServices.get("/" + serviceIdentifier)))
+            return service;
+
+        mServices.put(serviceIdentifier, service = new VehicleService(serviceIdentifier, mAppIdentifier, mDomain, null, null));
+
+        return service;
     }
 
-    public void updateService(String service) {
-        DlinkReceivePacket serviceInvokeJSONObject = new DlinkReceivePacket(getService(service));
-        RemoteConnectionManager.sendPacket(serviceInvokeJSONObject);
+    public void updateService(String serviceIdentifier, Object parameters, Long timeout) {
+        VehicleService service = getService(serviceIdentifier);
+
+        //if (service == null) mServices.put(serviceIdentifier, service = new VehicleService(serviceIdentifier, mAppIdentifier, mDomain, null, null));
+
+        service.setParameters(parameters);
+        service.setTimeout(timeout);
+
+        VehicleNode.updateService(service);
     }
 
     public void serviceUpdated(VehicleService service) {
         VehicleService ourService = getService(service.getServiceIdentifier());
 
-        ourService.setValue(service.getValue());
+        ourService.setParameters(service.getParameters());
 
         mListener.onServiceUpdated(ourService);
     }
@@ -86,17 +103,17 @@ public class VehicleApplication
         return mDomain;
     }
 
-    public String getRemotePrefix() {
-        return mRemotePrefix;
-    }
-
-    public void setRemotePrefix(String remotePrefix) {
-        mRemotePrefix = remotePrefix;
-        //mServices.removeAll(mServices);
-
-        for (VehicleService service : mServices)
-            service.setRemotePrefix(remotePrefix);
-    }
+//    public String getRemotePrefix() {
+//        return mRemotePrefix;
+//    }
+//
+//    public void setRemotePrefix(String remotePrefix) {
+//        mRemotePrefix = remotePrefix;
+//        //mServices.removeAll(mServices);
+//
+//        for (VehicleService service : mServices)
+//            service.setRemotePrefix(remotePrefix);
+//    }
 
     public VehicleApplicationListener getListener() {
         return mListener;
@@ -106,15 +123,34 @@ public class VehicleApplication
         mListener = listener;
     }
 
-    public ArrayList<VehicleService> getServices() {
+    public HashMap<String, VehicleService> getServices() {
         return mServices;
     }
+
+    public ArrayList<VehicleService> getLocalServices() {
+        ArrayList<VehicleService> localServices = new ArrayList<>(mServices.size());
+        for (VehicleService service : mServices.values())
+            if (service.getFullyQualifiedLocalServiceName() != null)
+                localServices.add(service);
+
+        return localServices;
+    }
+
+    public ArrayList<VehicleService> getRemoteServices() {
+        ArrayList<VehicleService> remoteServices = new ArrayList<>(mServices.size());
+        for (VehicleService service : mServices.values())
+            if (service.getFullyQualifiedRemoteServiceName() != null)
+                remoteServices.add(service);
+
+        return remoteServices;
+    }
+
 
     public String getAppIdentifier() {
         return mAppIdentifier;
     }
 
-    public void setAppIdentifier(String appIdentifier) {
-        mAppIdentifier = appIdentifier;
-    }
+//    public void setAppIdentifier(String appIdentifier) {
+//        mAppIdentifier = appIdentifier;
+//    }
 }

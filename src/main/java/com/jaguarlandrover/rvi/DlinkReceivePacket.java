@@ -54,13 +54,13 @@ public class DlinkReceivePacket extends DlinkPacket
         mData = Base64.encodeToString(mService.jsonString().getBytes(), Base64.DEFAULT);
     }
 
-    public DlinkReceivePacket(HashMap jsonHash) {
-        super(Command.RECEIVE, jsonHash);
-
-        mMod = (String) jsonHash.get("mod");
-
-        mService = new VehicleService(new String(Base64.decode((String)jsonHash.get("data"), Base64.DEFAULT)));
-    }
+//    public DlinkReceivePacket(HashMap jsonHash) {
+//        super(Command.RECEIVE, jsonHash);
+//
+//        mMod = (String) jsonHash.get("mod");
+//
+//        mService = new VehicleService(new String(Base64.decode((String)jsonHash.get("data"), Base64.DEFAULT)));
+//    }
 
     public VehicleService getService() {
         if (mService == null && mData != null)

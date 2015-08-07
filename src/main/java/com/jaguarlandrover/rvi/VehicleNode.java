@@ -7,7 +7,7 @@ package com.jaguarlandrover.rvi;
  * Mozilla Public License, version 2.0. The full text of the
  * Mozilla Public License is at https://www.mozilla.org/MPL/2.0/
  *
- * File:    RemoteVehicleNode.java
+ * File:    VehicleNode.java
  * Project: RVI SDK
  *
  * Created by Lilli Szafranski on 7/1/15.
@@ -20,32 +20,35 @@ import android.util.Base64;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.UUID;
 
 import static android.content.Context.MODE_PRIVATE;
 
-public class RemoteVehicleNode implements RemoteConnectionManagerListener
+public class VehicleNode implements RemoteConnectionManagerListener
 {
-    private final static String TAG = "RVI:RemoteVehicleNode";
+    private final static String TAG = "RVI:VehicleNode";
 
-    private static RemoteVehicleNode ourInstance = new RemoteVehicleNode();
+    private static VehicleNode ourInstance = new VehicleNode();
 
-    private RemoteVehicleNode() {
+    private VehicleNode() {
         RemoteConnectionManager.setListener(this);
     }
 
-    private static HashSet<VehicleApplication> allApps = new HashSet<>();
+    private static HashMap<String, VehicleApplication> allApps = new HashMap<>();
 
-    public static RemoteVehicleNodeListener getListener() {
+    private static HashSet<VehicleService> pendingServiceUpdates = new HashSet<>();
+
+    public static VehicleNodeListener getListener() {
         return ourInstance.mListener;
     }
 
-    public static void setListener(RemoteVehicleNodeListener listener) {
+    public static void setListener(VehicleNodeListener listener) {
         ourInstance.mListener = listener;
     }
 
-    public interface RemoteVehicleNodeListener
+    public interface VehicleNodeListener
     {
         public void nodeDidConnect();
 
@@ -55,7 +58,7 @@ public class RemoteVehicleNode implements RemoteConnectionManagerListener
 
     }
 
-    private RemoteVehicleNodeListener mListener;
+    private VehicleNodeListener mListener;
 
     public static void connect() {
         // are we configured
@@ -72,22 +75,31 @@ public class RemoteVehicleNode implements RemoteConnectionManagerListener
 
     // TODO: Change allApps to a set, to remove duplication
     public static void addApp(VehicleApplication app) {
-        RemoteVehicleNode.allApps.add(app);
-        RemoteVehicleNode.announceServices();
+        VehicleNode.allApps.put(app.getAppIdentifier(), app);
+        VehicleNode.announceServices();
     }
 
     public static void removeApp(VehicleApplication app) {
-        RemoteVehicleNode.allApps.remove(app);
-        RemoteVehicleNode.announceServices();
+        VehicleNode.allApps.remove(app.getAppIdentifier());
+        VehicleNode.announceServices();
     }
 
     // TODO: Change all services to a set, to remove duplication
     private static void announceServices() {
         ArrayList<VehicleService> allServices = new ArrayList<>();
-        for (VehicleApplication app : allApps)
-            allServices.addAll(app.getServices());
+        for (VehicleApplication app : allApps.values())
+            allServices.addAll(app.getLocalServices());
 
         RemoteConnectionManager.sendPacket(new DlinkServiceAnnouncePacket(allServices));
+    }
+
+    protected static void updateService(VehicleService service) {
+        if (service.hasRemotePrefix()) {
+            DlinkReceivePacket serviceInvokeJSONObject = new DlinkReceivePacket(service);
+            RemoteConnectionManager.sendPacket(serviceInvokeJSONObject);
+        } else {
+            pendingServiceUpdates.add(service);
+        }
     }
 
     @Override
@@ -116,9 +128,29 @@ public class RemoteVehicleNode implements RemoteConnectionManagerListener
         if (packet.getClass().equals(DlinkReceivePacket.class)) {
             VehicleService service = ((DlinkReceivePacket) packet).getService();
 
-            for (VehicleApplication app : allApps) {
-                if (app.getAppIdentifier().equals(service.getAppIdentifier())) {
-                    app.serviceUpdated(service);
+            allApps.get(service.getAppIdentifier()).serviceUpdated(service);
+
+        } else if (packet.getClass().equals(DlinkServiceAnnouncePacket.class)) {
+            for (String fullyQualifiedRemoteServiceName : ((DlinkServiceAnnouncePacket) packet).getServices()) {
+
+                String[] serviceParts = fullyQualifiedRemoteServiceName.split("/");
+
+                if (serviceParts.length != 5) return;
+
+                String domain = serviceParts[0];
+                String remotePrefix = "/" + serviceParts[1] + "/" + serviceParts[2];
+                String appIdentifier = "/" + serviceParts[3];
+                String serviceIdentifier = "/" + serviceParts[4];
+
+                allApps.get(appIdentifier).getService(serviceIdentifier).setRemotePrefix(remotePrefix);;
+            }
+
+            for (VehicleService service : pendingServiceUpdates) {
+                if (service.hasRemotePrefix() && service.getTimeout() >= System.currentTimeMillis()) {
+                    DlinkReceivePacket serviceInvokeJSONObject = new DlinkReceivePacket(service);
+                    RemoteConnectionManager.sendPacket(serviceInvokeJSONObject);
+                } else if (service.getTimeout() < System.currentTimeMillis()) {
+                    pendingServiceUpdates.remove(service);
                 }
             }
         }
