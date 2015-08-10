@@ -18,7 +18,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.HashMap;
 
-public class DlinkAuthPacket extends DlinkPacket
+class DlinkAuthPacket extends DlinkPacket
 {
     private final static String TAG = "RVI:DlinkAuthPacket";
 
@@ -37,7 +37,7 @@ public class DlinkAuthPacket extends DlinkPacket
     /**
      * Helper method to get an authorization json object
      */
-    public DlinkAuthPacket() {
+    DlinkAuthPacket() {
         super(Command.AUTHORIZE);
 
         mAddr = "0.0.0.0";

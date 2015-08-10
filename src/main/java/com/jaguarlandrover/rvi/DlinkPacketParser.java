@@ -17,26 +17,26 @@ package com.jaguarlandrover.rvi;
 import android.util.Log;
 import com.google.gson.Gson;
 
-public class DlinkPacketParser
+class DlinkPacketParser
 {
     private final static String TAG = "RVI:DlinkPacketParser";
 
     private String                    mBuffer;
     private DlinkPacketParserListener mDataParserListener;
 
-    public interface DlinkPacketParserListener
+    interface DlinkPacketParserListener
     {
         void onPacketParsed(DlinkPacket packet);
     }
 
-    public interface DlinkPacketParserTestCaseListener
+    interface DlinkPacketParserTestCaseListener
     {
         void onJsonStringParsed(String jsonString);
 
         void onJsonObjectParsed(Object jsonObject);
     }
 
-    public DlinkPacketParser(DlinkPacketParserListener listener) {
+    DlinkPacketParser(DlinkPacketParserListener listener) {
         mDataParserListener = listener;
     }
 
@@ -127,13 +127,13 @@ public class DlinkPacketParser
         }
     }
 
-    public void parseData(String data) {
+    void parseData(String data) {
         if (mBuffer == null) mBuffer = "";
 
         mBuffer = recurse(mBuffer + data);
     }
 
-    public void clear() {
+    void clear() {
         mBuffer = null;
     }
 

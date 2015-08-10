@@ -22,13 +22,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
-public class VehicleService
+class VehicleService
 {
     private final static String TAG = "RVI:VehicleService";
 
     private String mServiceIdentifier;
 
-    private String mAppIdentifier;
+    private String mBundleIdentifier;
     private String mDomain;
 
     private String mLocalPrefix;
@@ -38,15 +38,15 @@ public class VehicleService
 
     private Long mTimeout;
 
-    public VehicleService(String serviceIdentifier, String appIdentifier, String domain, String remotePrefix, String localPrefix) {
+    VehicleService(String serviceIdentifier, String domain, String bundleIdentifier, String remotePrefix, String localPrefix) {
         mServiceIdentifier = serviceIdentifier;
-        mAppIdentifier = appIdentifier;
+        mBundleIdentifier = bundleIdentifier;
         mDomain = domain;
         mRemotePrefix = remotePrefix;
-        mLocalPrefix = localPrefix; // TODO: This concept is HVAC specific; extract to an hvac-layer class
+        mLocalPrefix = localPrefix;
     }
 
-    public VehicleService(String jsonString) {
+    VehicleService(String jsonString) {
         Log.d(TAG, "Service data: " + jsonString);
 
         Gson gson = new Gson();
@@ -58,7 +58,7 @@ public class VehicleService
 
         mDomain = serviceParts[0];
         mRemotePrefix = "/" + serviceParts[1] + "/" + serviceParts[2];
-        mAppIdentifier = "/" + serviceParts[3];
+        mBundleIdentifier = "/" + serviceParts[3];
         mServiceIdentifier = "/" + serviceParts[4];
 
         LinkedTreeMap<Object, Object> parameters = ((ArrayList<LinkedTreeMap>) jsonHash.get("parameters")).get(0);
@@ -68,31 +68,31 @@ public class VehicleService
         mParameters = parameters.get("value"); // TODO: This concept is HVAC specific; extract to an hvac-layer class
     }
 
-    public Object getParameters() {
+    Object getParameters() {
         return mParameters;
     }
 
-    public void setParameters(Object mValue) {
-        this.mParameters = mValue;
+    void setParameters(Object parameters) {
+        this.mParameters = parameters;
     }
 
-    public String getServiceIdentifier() {
+    String getServiceIdentifier() {
         return mServiceIdentifier;
     }
 
-    public String getFullyQualifiedLocalServiceName() {
-        return mDomain + mLocalPrefix + mAppIdentifier + mServiceIdentifier;
+    String getFullyQualifiedLocalServiceName() {
+        return mDomain + mLocalPrefix + mBundleIdentifier + mServiceIdentifier;
     }
 
-    public String getFullyQualifiedRemoteServiceName() {
-        return mDomain + mRemotePrefix + mAppIdentifier + mServiceIdentifier;
+    String getFullyQualifiedRemoteServiceName() {
+        return mDomain + mRemotePrefix + mBundleIdentifier + mServiceIdentifier;
     }
 
-    public boolean hasRemotePrefix() {
+    boolean hasRemotePrefix() {
         return mRemotePrefix != null;
     }
 
-    public Object generateRequestParams() {
+    Object generateRequestParams() {
         HashMap<String, Object> params = new HashMap<>(4);
 
         params.put("service", getFullyQualifiedRemoteServiceName());
@@ -104,7 +104,7 @@ public class VehicleService
         return params;
     }
 
-    public String jsonString() {
+    String jsonString() {
         Gson gson = new Gson();
 
         Log.d(TAG, "Service data: " + gson.toJson(generateRequestParams()));
@@ -112,23 +112,23 @@ public class VehicleService
         return gson.toJson(generateRequestParams());
     }
 
-    public String getAppIdentifier() {
-        return mAppIdentifier;
+    String getBundleIdentifier() {
+        return mBundleIdentifier;
     }
 
-    public String getRemotePrefix() {
+    String getRemotePrefix() {
         return mRemotePrefix;
     }
 
-    public void setRemotePrefix(String remotePrefix) {
+    void setRemotePrefix(String remotePrefix) {
         mRemotePrefix = remotePrefix;
     }
 
-    public Long getTimeout() {
+    Long getTimeout() {
         return mTimeout;
     }
 
-    public void setTimeout(Long timeout) {
+    void setTimeout(Long timeout) {
         mTimeout =  System.currentTimeMillis() + timeout;
     }
 }

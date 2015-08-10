@@ -20,7 +20,7 @@ import com.google.gson.annotations.SerializedName;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class DlinkServiceAnnouncePacket extends DlinkPacket
+class DlinkServiceAnnouncePacket extends DlinkPacket
 {
     private final static String TAG = "RVI:DlinkServi...Packet";
 
@@ -38,7 +38,7 @@ public class DlinkServiceAnnouncePacket extends DlinkPacket
         return newList;
     }
 
-    public DlinkServiceAnnouncePacket() {
+    DlinkServiceAnnouncePacket() {
     }
 
     /**
@@ -47,14 +47,14 @@ public class DlinkServiceAnnouncePacket extends DlinkPacket
      * @param services The array of services to announce
      *
      */
-    public DlinkServiceAnnouncePacket(ArrayList<VehicleService> services) {
+    DlinkServiceAnnouncePacket(ArrayList<VehicleService> services) {
         super(Command.SERVICE_ANNOUNCE);
 
         mStatus   = "av"; // TODO: Confirm what this is/where is comes from
         mServices = getServiceFQNames(services);
     }
 
-    public ArrayList<String> getServices() {
+    ArrayList<String> getServices() {
         return mServices;
     }
 

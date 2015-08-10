@@ -16,15 +16,12 @@ package com.jaguarlandrover.rvi;
 
 import android.util.Log;
 
-public class RemoteConnectionManager implements RemoteConnectionInterface.RemoteConnectionListener, DlinkPacketParser.DlinkPacketParserListener
+public class RemoteConnectionManager
 {
     private final static String TAG = "RVI:RemoteCon...Manager";
 
     private static RemoteConnectionManager ourInstance = new RemoteConnectionManager();
 
-    //private boolean mUsingProxyServer;
-
-    //private ServerConnection    mProxyServerConnection;
     private BluetoothConnection mBluetoothConnection;
     private ServerConnection    mDirectServerConnection;
 
@@ -33,33 +30,70 @@ public class RemoteConnectionManager implements RemoteConnectionInterface.Remote
     private RemoteConnectionManagerListener mListener;
 
     private RemoteConnectionManager() {
-        mDataParser = new DlinkPacketParser(this);
+        mDataParser = new DlinkPacketParser(new DlinkPacketParser.DlinkPacketParserListener()
+        {
+            @Override
+            public void onPacketParsed(DlinkPacket packet) {
+                if (mListener != null) mListener.onRVIDidReceivePacket(packet);
+            }
+        });
 
-        //mProxyServerConnection = new ServerConnection();
+        RemoteConnectionInterface.RemoteConnectionListener connectionListener = new RemoteConnectionInterface.RemoteConnectionListener()
+        {
+            @Override
+            public void onRemoteConnectionDidConnect() {
+                if (mListener != null) mListener.onRVIDidConnect();
+            }
+
+            @Override
+            public void onRemoteConnectionDidDisconnect() {
+                if (mListener != null) mListener.onRVIDidDisconnect();
+            }
+
+            @Override
+            public void onRemoteConnectionDidFailToConnect(Error error) {
+                if (mListener != null) mListener.onRVIDidFailToConnect(error);
+            }
+
+            @Override
+            public void onRemoteConnectionDidReceiveData(String data) {
+                mDataParser.parseData(data);
+            }
+
+            @Override
+            public void onDidSendDataToRemoteConnection() {
+                if (mListener != null) mListener.onRVIDidSendPacket();
+            }
+
+            @Override
+            public void onDidFailToSendDataToRemoteConnection(Error error) {
+                if (mListener != null) mListener.onRVIDidFailToSendPacket(error);
+            }
+        };
+
         mBluetoothConnection = new BluetoothConnection();
         mDirectServerConnection = new ServerConnection();
+
+        mBluetoothConnection.setRemoteConnectionListener(connectionListener);
+        mDirectServerConnection.setRemoteConnectionListener(connectionListener);
     }
 
-    public static void connect() {
+    static void connect() {
         ourInstance.closeConnections();
 
         RemoteConnectionInterface remoteConnection = ourInstance.selectEnabledRemoteConnection();
 
         if (remoteConnection == null) return;
 
-        remoteConnection
-                .setRemoteConnectionListener(ourInstance); // TODO: Doing it this way, dynamically selecting a connection at the beginning and later when sending messages,
-        // TODO, cont': but only setting the listener here, will lead to funny async race conditions later; fix.
         remoteConnection.connect();
     }
 
-    public static void disconnect() {
+    static void disconnect() {
         ourInstance.closeConnections();
         ourInstance.mDataParser.clear();
-        ourInstance.mListener.onRVIDidDisconnect();
     }
 
-    public static void sendPacket(DlinkPacket dlinkPacket) {
+    static void sendPacket(DlinkPacket dlinkPacket) {
         Log.d(TAG, Util.getMethodName());
 
         RemoteConnectionInterface remoteConnection = ourInstance.selectConnectedRemoteConnection();
@@ -70,10 +104,8 @@ public class RemoteConnectionManager implements RemoteConnectionInterface.Remote
     }
 
     private RemoteConnectionInterface selectConnectedRemoteConnection() {
-        if (mDirectServerConnection.isEnabled() && mDirectServerConnection.isConnected())// && !mUsingProxyServer)
+        if (mDirectServerConnection.isEnabled() && mDirectServerConnection.isConnected())
             return mDirectServerConnection;
-//        if (mProxyServerConnection.isEnabled() && mProxyServerConnection.isConnected() && mUsingProxyServer)
-//            return mProxyServerConnection;
         if (mBluetoothConnection.isEnabled() && mBluetoothConnection.isConnected()) {
             return mBluetoothConnection;
         }
@@ -82,10 +114,8 @@ public class RemoteConnectionManager implements RemoteConnectionInterface.Remote
     }
 
     private RemoteConnectionInterface selectEnabledRemoteConnection() { // TODO: This is going to be buggy if a connection is enabled but not connected; the other connections won't have connected
-        if (mDirectServerConnection.isEnabled())// && !mUsingProxyServer)     // TODO: Rewrite better 'chosing' code
+        if (mDirectServerConnection.isEnabled())                        // TODO: Rewrite better 'choosing' code
             return mDirectServerConnection;
-//        if (mProxyServerConnection.isEnabled() && mUsingProxyServer)
-//            return mProxyServerConnection;
         if (mBluetoothConnection.isEnabled()) {
             return mBluetoothConnection;
         }
@@ -95,38 +125,7 @@ public class RemoteConnectionManager implements RemoteConnectionInterface.Remote
 
     private void closeConnections() {
         mDirectServerConnection.disconnect();
-        //mProxyServerConnection.disconnect();
         mBluetoothConnection.disconnect();
-    }
-
-    @Override
-    public void onRemoteConnectionDidConnect() {
-        mListener.onRVIDidConnect();
-    }
-
-    @Override
-    public void onRemoteConnectionDidFailToConnect(Error error) {
-        mListener.onRVIDidFailToConnect(error);
-    }
-
-    @Override
-    public void onRemoteConnectionDidReceiveData(String data) {
-        mDataParser.parseData(data);
-    }
-
-    @Override
-    public void onDidSendDataToRemoteConnection() {
-        mListener.onRVIDidSendPacket();
-    }
-
-    @Override
-    public void onDidFailToSendDataToRemoteConnection(Error error) {
-        mListener.onRVIDidFailToSendPacket(error);
-    }
-
-    @Override
-    public void onPacketParsed(DlinkPacket packet) {
-        mListener.onRVIDidReceivePacket(packet);
     }
 
     public static void setServerUrl(String serverUrl) {
@@ -137,23 +136,11 @@ public class RemoteConnectionManager implements RemoteConnectionInterface.Remote
         RemoteConnectionManager.ourInstance.mDirectServerConnection.setServerPort(serverPort);
     }
 
-//    public static void setProxyServerUrl(String proxyServerUrl) {
-//        RemoteConnectionManager.ourInstance.mProxyServerConnection.setServerUrl(proxyServerUrl);
-//    }
-//
-//    public static void setProxyServerPort(Integer proxyServerPort) {
-//        RemoteConnectionManager.ourInstance.mProxyServerConnection.setServerPort(proxyServerPort);
-//    }
-//
-//    public static void setUsingProxyServer(boolean usingProxyServer) {
-//        RemoteConnectionManager.ourInstance.mUsingProxyServer = usingProxyServer;
-//    }
-
-    public static RemoteConnectionManagerListener getListener() {
+    static RemoteConnectionManagerListener getListener() {
         return RemoteConnectionManager.ourInstance.mListener;
     }
 
-    public static void setListener(RemoteConnectionManagerListener listener) {
+    static void setListener(RemoteConnectionManagerListener listener) {
         RemoteConnectionManager.ourInstance.mListener = listener;
     }
 }

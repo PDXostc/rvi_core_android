@@ -19,7 +19,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.HashMap;
 
-public class DlinkPacket
+class DlinkPacket
 {
     private final static String TAG = "RVI:DlinkPacket";
 
@@ -59,7 +59,7 @@ public class DlinkPacket
      */
     protected String toJsonString() {
         Gson gson = new Gson();
-        return gson.toJson(this);//jsonHash());
+        return gson.toJson(this);
     }
 
     protected DlinkPacket() {

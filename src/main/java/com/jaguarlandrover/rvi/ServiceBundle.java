@@ -7,7 +7,7 @@ package com.jaguarlandrover.rvi;
  * Mozilla Public License, version 2.0. The full text of the
  * Mozilla Public License is at https://www.mozilla.org/MPL/2.0/
  *
- * File:    VehicleApplication.java
+ * File:    ServiceBundle.java
  * Project: RVI SDK
  *
  * Created by Lilli Szafranski on 5/19/15.
@@ -20,11 +20,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 
-public class VehicleApplication
+public class ServiceBundle
 {
-    private final static String TAG = "RVI:VehicleApplication";
+    private final static String TAG = "RVI:ServiceBundle";
 
-    private String mAppIdentifier;
+    private String mBundleIdentifier;
     private String mDomain;
 
 //    private String mRemotePrefix;
@@ -32,22 +32,22 @@ public class VehicleApplication
 
     private HashMap<String, VehicleService> mServices;
 
-    public interface VehicleApplicationListener
+    public interface ServiceBundleListener
     {
-        public void onServiceUpdated(VehicleService service);
+        public void onServiceUpdated(String serviceIdentifier, Object value);
     }
 
-    private VehicleApplicationListener mListener;
+    private ServiceBundleListener mListener;
 
-    public VehicleApplication(Context context, String appIdentifier, String domain, /*String remotePrefix,*/ ArrayList<String> servicesIdentifiers) {
-        mAppIdentifier = appIdentifier;
+    public ServiceBundle(Context context, String domain, String bundleIdentifier, /*String remotePrefix,*/ ArrayList<String> servicesIdentifiers) {
+        mBundleIdentifier = bundleIdentifier;
         mDomain = domain;
-        //mRemotePrefix = remotePrefix;
 
-        //mLocalPrefix = VehicleNode.getLocalServicePrefix(context);
+        //mRemotePrefix = remotePrefix;
+        //mLocalPrefix = RVINode.getLocalServicePrefix(context);
         //"/android/" + UUID.randomUUID().toString();//987654321"; // TODO: Generate randomly
 
-        mServices = makeServices(servicesIdentifiers, VehicleNode.getLocalServicePrefix(context));
+        mServices = makeServices(servicesIdentifiers, RVINode.getLocalServicePrefix(context));
     }
 
     private HashMap<String, VehicleService> makeServices(ArrayList<String> serviceIdentifiers, String localPrefix) {
@@ -59,7 +59,7 @@ public class VehicleApplication
     }
 
     private VehicleService makeService(String serviceIdentifier, String localPrefix) {
-        return new VehicleService(serviceIdentifier, mAppIdentifier, mDomain, null, localPrefix);//mRemotePrefix, mLocalPrefix);
+        return new VehicleService(serviceIdentifier, mDomain, mBundleIdentifier, null, localPrefix);//mRemotePrefix, mLocalPrefix);
     }
 
     public VehicleService getService(String serviceIdentifier) {
@@ -75,7 +75,7 @@ public class VehicleApplication
         if (null != (service = mServices.get("/" + serviceIdentifier)))
             return service;
 
-        mServices.put(serviceIdentifier, service = new VehicleService(serviceIdentifier, mAppIdentifier, mDomain, null, null));
+        mServices.put(serviceIdentifier, service = new VehicleService(serviceIdentifier, mDomain, mBundleIdentifier, null, null));
 
         return service;
     }
@@ -83,25 +83,25 @@ public class VehicleApplication
     public void updateService(String serviceIdentifier, Object parameters, Long timeout) {
         VehicleService service = getService(serviceIdentifier);
 
-        //if (service == null) mServices.put(serviceIdentifier, service = new VehicleService(serviceIdentifier, mAppIdentifier, mDomain, null, null));
+        //if (service == null) mServices.put(serviceIdentifier, service = new VehicleService(serviceIdentifier, mBundleIdentifier, mDomain, null, null));
 
         service.setParameters(parameters);
         service.setTimeout(timeout);
 
-        VehicleNode.updateService(service);
+        RVINode.updateService(service);
     }
 
     public void serviceUpdated(VehicleService service) {
-        VehicleService ourService = getService(service.getServiceIdentifier());
+//        VehicleService ourService = getService(service.getServiceIdentifier());
+//
+//        ourService.setParameters(service.getParameters());
 
-        ourService.setParameters(service.getParameters());
-
-        mListener.onServiceUpdated(ourService);
+        if (mListener != null) mListener.onServiceUpdated(service.getServiceIdentifier(), service.getParameters()); // TODO: This code can pass through a service that might not exist locally
     }
 
-    public String getDomain() {
-        return mDomain;
-    }
+//    public String getDomain() {
+//        return mDomain;
+//    }
 
 //    public String getRemotePrefix() {
 //        return mRemotePrefix;
@@ -115,11 +115,11 @@ public class VehicleApplication
 //            service.setRemotePrefix(remotePrefix);
 //    }
 
-    public VehicleApplicationListener getListener() {
-        return mListener;
-    }
+//    public ServiceBundleListener getListener() {
+//        return mListener;
+//    }
 
-    public void setListener(VehicleApplicationListener listener) {
+    public void setListener(ServiceBundleListener listener) {
         mListener = listener;
     }
 
@@ -145,12 +145,11 @@ public class VehicleApplication
         return remoteServices;
     }
 
-
-    public String getAppIdentifier() {
-        return mAppIdentifier;
+    public String getBundleIdentifier() {
+        return mBundleIdentifier;
     }
 
 //    public void setAppIdentifier(String appIdentifier) {
-//        mAppIdentifier = appIdentifier;
+//        mBundleIdentifier = appIdentifier;
 //    }
 }

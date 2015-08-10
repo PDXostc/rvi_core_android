@@ -14,7 +14,7 @@ package com.jaguarlandrover.rvi;
  *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-public interface RemoteConnectionInterface
+interface RemoteConnectionInterface
 {
     void sendRviRequest(DlinkPacket dlinkPacket);
 
@@ -26,16 +26,18 @@ public interface RemoteConnectionInterface
 
     void setRemoteConnectionListener(RemoteConnectionListener remoteConnectionListener); // TODO: Probably bad architecture to expect interface implementations to correctly set and use an
                                                                                          // TODO, cont: instance of the RemoteConnectionListener. Not sure what the best Java paradigm would be in this case
-    public interface RemoteConnectionListener
+    interface RemoteConnectionListener
     {
-        public void onRemoteConnectionDidConnect();
+        void onRemoteConnectionDidConnect();
 
-        public void onRemoteConnectionDidFailToConnect(Error error);
+        void onRemoteConnectionDidDisconnect();
 
-        public void onRemoteConnectionDidReceiveData(String data);
+        void onRemoteConnectionDidFailToConnect(Error error);
 
-        public void onDidSendDataToRemoteConnection();
+        void onRemoteConnectionDidReceiveData(String data);
 
-        public void onDidFailToSendDataToRemoteConnection(Error error);
+        void onDidSendDataToRemoteConnection();
+
+        void onDidFailToSendDataToRemoteConnection(Error error);
     }
 }

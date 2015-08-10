@@ -24,7 +24,7 @@ import java.io.InputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-public class ServerConnection implements RemoteConnectionInterface
+class ServerConnection implements RemoteConnectionInterface
 {
     private final static String TAG = "RVI:ServerConnection";
     private RemoteConnectionListener mRemoteConnectionListener;
@@ -44,12 +44,12 @@ public class ServerConnection implements RemoteConnectionInterface
 
     @Override
     public boolean isConnected() {
-        return mSocket != null && mSocket.isConnected();//true;
+        return mSocket != null && mSocket.isConnected();
     }
 
     @Override
     public boolean isEnabled() {
-        return !(mServerUrl == null || mServerUrl.isEmpty());
+        return !(mServerUrl == null || mServerUrl.isEmpty() || mServerPort == 0);
     }
 
     @Override
@@ -65,6 +65,8 @@ public class ServerConnection implements RemoteConnectionInterface
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        if (mRemoteConnectionListener != null) mRemoteConnectionListener.onRemoteConnectionDidDisconnect();
     }
 
     @Override
@@ -80,9 +82,11 @@ public class ServerConnection implements RemoteConnectionInterface
 
     }
 
-    public class ConnectTask extends AsyncTask<Void, String, Void> {
+    private class ConnectTask extends AsyncTask<Void, String, Void> {
         String dstAddress;
         int    dstPort;
+
+        boolean success = true;
 
         ConnectTask(String addr, int port) {
            dstAddress = addr;
@@ -98,13 +102,16 @@ public class ServerConnection implements RemoteConnectionInterface
             } catch (UnknownHostException e) {
                 e.printStackTrace();
 
-                mRemoteConnectionListener.onRemoteConnectionDidFailToConnect(new Error("UnknownHostException: " + e
-                        .toString()));
+                success = false;
+
+                if (mRemoteConnectionListener != null) mRemoteConnectionListener.onRemoteConnectionDidFailToConnect(new Error("UnknownHostException: " + e.toString()));
 
             } catch (IOException e) {
                 e.printStackTrace();
 
-                mRemoteConnectionListener.onRemoteConnectionDidFailToConnect(new Error("IOException: " + e.toString()));
+                success = false;
+
+                if (mRemoteConnectionListener != null) mRemoteConnectionListener.onRemoteConnectionDidFailToConnect(new Error("IOException: " + e.toString()));
 
             }
             return null;
@@ -118,11 +125,11 @@ public class ServerConnection implements RemoteConnectionInterface
             ListenTask listenTask = new ListenTask();
             listenTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
-            mRemoteConnectionListener.onRemoteConnectionDidConnect();
+            if (success) if (mRemoteConnectionListener != null) mRemoteConnectionListener.onRemoteConnectionDidConnect();
         }
     }
 
-    public class ListenTask extends AsyncTask<Void, String, Void> {
+    private class ListenTask extends AsyncTask<Void, String, Void> {
 
         @Override
         protected Void doInBackground(Void... params) {
@@ -156,17 +163,21 @@ public class ServerConnection implements RemoteConnectionInterface
 
             String data = params[0];
 
-            mRemoteConnectionListener.onRemoteConnectionDidReceiveData(data);
+            if (mRemoteConnectionListener != null) mRemoteConnectionListener.onRemoteConnectionDidReceiveData(data);
         }
 
         @Override
         protected void onPostExecute(Void result) {
             super.onPostExecute(result);
+
+            if (mRemoteConnectionListener != null) mRemoteConnectionListener.onRemoteConnectionDidDisconnect();
         }
     }
 
     private class SendDataTask extends AsyncTask<String, Void, Void>
     {
+        boolean success = true;
+
         @Override
         protected Void doInBackground(String... params) {
 
@@ -183,6 +194,11 @@ public class ServerConnection implements RemoteConnectionInterface
             }
             catch (IOException e) {
                 e.printStackTrace();
+
+                success = false;
+
+                // TODO: Correctly catch and parse exceptions to detect if the socket is closed or if there was just an error
+                // sending the packet, and report through remoteConnectionListener interface appropriately
             }
 
             return null;
@@ -190,23 +206,23 @@ public class ServerConnection implements RemoteConnectionInterface
 
         @Override
         protected void onPostExecute(Void result) {
-
+            if (success) if (mRemoteConnectionListener != null) mRemoteConnectionListener.onDidSendDataToRemoteConnection();
         }
     }
 
-    public String getServerUrl() {
-        return mServerUrl;
-    }
+    //public String getServerUrl() {
+    //    return mServerUrl;
+    //}
 
-    public void setServerUrl(String serverUrl) {
+    void setServerUrl(String serverUrl) {
         mServerUrl = serverUrl;
     }
 
-    public Integer getServerPort() {
-        return mServerPort;
-    }
+    //public Integer getServerPort() {
+    //    return mServerPort;
+    //}
 
-    public void setServerPort(Integer serverPort) {
+    void setServerPort(Integer serverPort) {
         mServerPort = serverPort;
     }
 

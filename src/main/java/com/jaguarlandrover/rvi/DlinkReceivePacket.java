@@ -19,7 +19,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.HashMap;
 
-public class DlinkReceivePacket extends DlinkPacket
+class DlinkReceivePacket extends DlinkPacket
 {
     private final static String TAG = "RVI:DlinkReceivePacket";
 
@@ -38,7 +38,7 @@ public class DlinkReceivePacket extends DlinkPacket
     @SerializedName("data")
     private String mData;
 
-    public DlinkReceivePacket() {
+    DlinkReceivePacket() {
     }
 
     /**
@@ -46,7 +46,7 @@ public class DlinkReceivePacket extends DlinkPacket
      *
      * @param service The service that is getting invoked
      */
-    public DlinkReceivePacket(VehicleService service) {
+    DlinkReceivePacket(VehicleService service) {
         super(Command.RECEIVE);
 
         mMod = "proto_json_rpc";
@@ -62,14 +62,14 @@ public class DlinkReceivePacket extends DlinkPacket
 //        mService = new VehicleService(new String(Base64.decode((String)jsonHash.get("data"), Base64.DEFAULT)));
 //    }
 
-    public VehicleService getService() {
+    VehicleService getService() {
         if (mService == null && mData != null)
             mService = new VehicleService(new String(Base64.decode(mData, Base64.DEFAULT)));
 
         return mService;
     }
 
-    public void setService(VehicleService service) {
+    void setService(VehicleService service) {
         mService = service;
     }
 }

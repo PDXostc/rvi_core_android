@@ -14,17 +14,17 @@ package com.jaguarlandrover.rvi;
  * Created by Lilli Szafranski on 6/30/15.
  *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-public interface RemoteConnectionManagerListener
+interface RemoteConnectionManagerListener
 {
-    public void onRVIDidConnect();
+    void onRVIDidConnect();
 
-    public void onRVIDidFailToConnect(Error error);
+    void onRVIDidFailToConnect(Error error);
 
-    public void onRVIDidDisconnect();
+    void onRVIDidDisconnect();
 
-    public void onRVIDidReceivePacket(DlinkPacket packet);
+    void onRVIDidReceivePacket(DlinkPacket packet);
 
-    public void onRVIDidSendPacket();
+    void onRVIDidSendPacket();
 
-    public void onRVIDidFailToSendPacket(Error error);
+    void onRVIDidFailToSendPacket(Error error);
 }
