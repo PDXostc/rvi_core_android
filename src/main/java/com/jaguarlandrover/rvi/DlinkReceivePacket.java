@@ -19,6 +19,9 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.HashMap;
 
+/**
+ * The type Dlink receive packet.
+ */
 class DlinkReceivePacket extends DlinkPacket
 {
     private final static String TAG = "RVI:DlinkReceivePacket";
@@ -38,6 +41,9 @@ class DlinkReceivePacket extends DlinkPacket
     @SerializedName("data")
     private String mData;
 
+    /**
+     * Instantiates a new Dlink receive packet.
+     */
     DlinkReceivePacket() {
     }
 
@@ -62,6 +68,11 @@ class DlinkReceivePacket extends DlinkPacket
 //        mService = new VehicleService(new String(Base64.decode((String)jsonHash.get("data"), Base64.DEFAULT)));
 //    }
 
+    /**
+     * Gets service.
+     *
+     * @return the service
+     */
     VehicleService getService() {
         if (mService == null && mData != null)
             mService = new VehicleService(new String(Base64.decode(mData, Base64.DEFAULT)));
@@ -69,6 +80,11 @@ class DlinkReceivePacket extends DlinkPacket
         return mService;
     }
 
+    /**
+     * Sets service.
+     *
+     * @param service the service
+     */
     void setService(VehicleService service) {
         mService = service;
     }

@@ -26,6 +26,9 @@ import java.util.UUID;
 
 import static android.content.Context.MODE_PRIVATE;
 
+/**
+ * The type RVI node.
+ */
 public class RVINode
 {
     private final static String TAG = "RVI:RVINode";
@@ -110,22 +113,42 @@ public class RVINode
     //    return ourInstance.mListener;
     //}
 
+    /**
+     * Sets listener.
+     *
+     * @param listener the listener
+     */
     public static void setListener(RVINodeListener listener) {
         ourInstance.mListener = listener;
     }
 
+    /**
+     * The interface RVI node listener.
+     */
     public interface RVINodeListener
     {
+        /**
+         * Node did connect.
+         */
         public void nodeDidConnect();
 
+        /**
+         * Node did fail to connect.
+         */
         public void nodeDidFailToConnect();
 
+        /**
+         * Node did disconnect.
+         */
         public void nodeDidDisconnect();
 
     }
 
     private RVINodeListener mListener;
 
+    /**
+     * Connect void.
+     */
     public static void connect() {
         // are we configured
         // connect
@@ -133,17 +156,30 @@ public class RVINode
 
     }
 
+    /**
+     * Disconnect void.
+     */
     public static void disconnect() {
         // disconnect
 
         RemoteConnectionManager.disconnect();
     }
 
+    /**
+     * Add bundle.
+     *
+     * @param bundle the bundle
+     */
     public static void addBundle(ServiceBundle bundle) {
         RVINode.allServiceBundles.put(bundle.getBundleIdentifier(), bundle);
         RVINode.announceServices();
     }
 
+    /**
+     * Remove bundle.
+     *
+     * @param bundle the bundle
+     */
     public static void removeBundle(ServiceBundle bundle) {
         RVINode.allServiceBundles.remove(bundle.getBundleIdentifier());
         RVINode.announceServices();
@@ -157,6 +193,11 @@ public class RVINode
         RemoteConnectionManager.sendPacket(new DlinkServiceAnnouncePacket(allServices));
     }
 
+    /**
+     * Update service.
+     *
+     * @param service the service
+     */
     protected static void updateService(VehicleService service) {
         if (service.hasRemotePrefix()) {
             RemoteConnectionManager.sendPacket(new DlinkReceivePacket(service));
@@ -186,6 +227,12 @@ public class RVINode
         return b64Str;
     }
 
+    /**
+     * Gets local service prefix.
+     *
+     * @param context the context
+     * @return the local service prefix
+     */
     public static String getLocalServicePrefix(Context context) {
         SharedPreferences sharedPrefs = context.getSharedPreferences(SHARED_PREFS_STRING, MODE_PRIVATE);
         String localServicePrefix;

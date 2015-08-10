@@ -19,19 +19,42 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.HashMap;
 
+/**
+ * The type Dlink packet.
+ */
 class DlinkPacket
 {
     private final static String TAG = "RVI:DlinkPacket";
 
+    /**
+     * The enum Command.
+     */
     protected enum Command
     {
-        @SerializedName("au")   AUTHORIZE("au"),
-        @SerializedName("sa")   SERVICE_ANNOUNCE("sa"),
-        @SerializedName("rcv")  RECEIVE("rcv"),
-        @SerializedName("ping") PING("ping");
+        /**
+         * The AUTHORIZE.
+         */
+        @SerializedName("au")AUTHORIZE("au"),
+        /**
+         * The SERVICE_ANNOUNCE.
+         */
+        @SerializedName("sa")SERVICE_ANNOUNCE("sa"),
+        /**
+         * The RECEIVE.
+         */
+        @SerializedName("rcv")RECEIVE("rcv"),
+        /**
+         * The PING.
+         */
+        @SerializedName("ping")PING("ping");
 
         private final String mString;
 
+        /**
+         * Instantiates a new Command.
+         *
+         * @param string the string
+         */
         Command(String string) {
             mString = string;
         }
@@ -49,6 +72,9 @@ class DlinkPacket
     @SerializedName("cmd")
     protected Command mCmd = null;
 
+    /**
+     * The M sig.
+     */
     @SerializedName("sign")
     protected String mSig = null;
 
@@ -56,22 +82,27 @@ class DlinkPacket
 
     /**
      * Serializes the object into json strVal
+     * @return the string
      */
     protected String toJsonString() {
         Gson gson = new Gson();
         return gson.toJson(this);
     }
 
+    /**
+     * Instantiates a new Dlink packet.
+     */
     protected DlinkPacket() {
 
     }
 
     /**
      * Base constructor of the DlinkPacket
+     * @param command the command
      */
     protected DlinkPacket(Command command) {
         if (command == null) {
-          throw new IllegalArgumentException("Command can't be null");
+            throw new IllegalArgumentException("Command can't be null");
         }
 
         mCmd = command;
@@ -80,9 +111,15 @@ class DlinkPacket
         mSig = "";
     }
 
+    /**
+     * Instantiates a new Dlink packet.
+     *
+     * @param command the command
+     * @param jsonHash the json hash
+     */
     protected DlinkPacket(Command command, HashMap jsonHash) {
-        if (command == null || jsonHash == null)  {
-          throw new IllegalArgumentException("Constructor arguments can't be null");
+        if (command == null || jsonHash == null) {
+            throw new IllegalArgumentException("Constructor arguments can't be null");
         }
 
         mCmd = command;

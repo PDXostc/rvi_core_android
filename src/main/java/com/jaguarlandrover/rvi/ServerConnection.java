@@ -24,6 +24,9 @@ import java.io.InputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+/**
+ * The type Server connection.
+ */
 class ServerConnection implements RemoteConnectionInterface
 {
     private final static String TAG = "RVI:ServerConnection";
@@ -32,6 +35,9 @@ class ServerConnection implements RemoteConnectionInterface
     private String  mServerUrl;
     private Integer mServerPort;
 
+    /**
+     * The M socket.
+     */
     Socket mSocket;
 
     @Override
@@ -62,7 +68,8 @@ class ServerConnection implements RemoteConnectionInterface
         try {
             if (mSocket != null)
                 mSocket.close();
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             e.printStackTrace();
         }
 
@@ -83,14 +90,29 @@ class ServerConnection implements RemoteConnectionInterface
     }
 
     private class ConnectTask extends AsyncTask<Void, String, Void> {
+        /**
+         * The Dst address.
+         */
         String dstAddress;
+        /**
+         * The Dst port.
+         */
         int    dstPort;
 
+        /**
+         * The Success.
+         */
         boolean success = true;
 
+        /**
+         * Instantiates a new Connect task.
+         *
+         * @param addr the addr
+         * @param port the port
+         */
         ConnectTask(String addr, int port) {
-           dstAddress = addr;
-           dstPort = port;
+            dstAddress = addr;
+            dstPort = port;
         }
 
         @Override
@@ -99,19 +121,23 @@ class ServerConnection implements RemoteConnectionInterface
             try {
                 mSocket = new Socket(dstAddress, dstPort);
 
-            } catch (UnknownHostException e) {
+            }
+            catch (UnknownHostException e) {
                 e.printStackTrace();
 
                 success = false;
 
-                if (mRemoteConnectionListener != null) mRemoteConnectionListener.onRemoteConnectionDidFailToConnect(new Error("UnknownHostException: " + e.toString()));
+                if (mRemoteConnectionListener != null) mRemoteConnectionListener
+                        .onRemoteConnectionDidFailToConnect(new Error("UnknownHostException: " + e.toString()));
 
-            } catch (IOException e) {
+            }
+            catch (IOException e) {
                 e.printStackTrace();
 
                 success = false;
 
-                if (mRemoteConnectionListener != null) mRemoteConnectionListener.onRemoteConnectionDidFailToConnect(new Error("IOException: " + e.toString()));
+                if (mRemoteConnectionListener != null) mRemoteConnectionListener
+                        .onRemoteConnectionDidFailToConnect(new Error("IOException: " + e.toString()));
 
             }
             return null;
@@ -125,11 +151,13 @@ class ServerConnection implements RemoteConnectionInterface
             ListenTask listenTask = new ListenTask();
             listenTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
-            if (success) if (mRemoteConnectionListener != null) mRemoteConnectionListener.onRemoteConnectionDidConnect();
+            if (success)
+                if (mRemoteConnectionListener != null) mRemoteConnectionListener.onRemoteConnectionDidConnect();
         }
     }
 
-    private class ListenTask extends AsyncTask<Void, String, Void> {
+    private class ListenTask extends AsyncTask<Void, String, Void>
+    {
 
         @Override
         protected Void doInBackground(Void... params) {
@@ -148,7 +176,8 @@ class ServerConnection implements RemoteConnectionInterface
                     publishProgress(byteArrayOutputStream.toString("UTF-8"));
                     byteArrayOutputStream.reset();
                 }
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 e.printStackTrace();
 
                 publishProgress("Exception: " + e.toString());
@@ -176,6 +205,9 @@ class ServerConnection implements RemoteConnectionInterface
 
     private class SendDataTask extends AsyncTask<String, Void, Void>
     {
+        /**
+         * The Success.
+         */
         boolean success = true;
 
         @Override
@@ -206,7 +238,8 @@ class ServerConnection implements RemoteConnectionInterface
 
         @Override
         protected void onPostExecute(Void result) {
-            if (success) if (mRemoteConnectionListener != null) mRemoteConnectionListener.onDidSendDataToRemoteConnection();
+            if (success)
+                if (mRemoteConnectionListener != null) mRemoteConnectionListener.onDidSendDataToRemoteConnection();
         }
     }
 
@@ -214,6 +247,11 @@ class ServerConnection implements RemoteConnectionInterface
     //    return mServerUrl;
     //}
 
+    /**
+     * Sets server url.
+     *
+     * @param serverUrl the server url
+     */
     void setServerUrl(String serverUrl) {
         mServerUrl = serverUrl;
     }
@@ -222,6 +260,11 @@ class ServerConnection implements RemoteConnectionInterface
     //    return mServerPort;
     //}
 
+    /**
+     * Sets server port.
+     *
+     * @param serverPort the server port
+     */
     void setServerPort(Integer serverPort) {
         mServerPort = serverPort;
     }

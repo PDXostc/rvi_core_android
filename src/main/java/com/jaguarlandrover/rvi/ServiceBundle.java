@@ -20,6 +20,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 
+/**
+ * The type Service bundle.
+ */
 public class ServiceBundle
 {
     private final static String TAG = "RVI:ServiceBundle";
@@ -32,13 +35,30 @@ public class ServiceBundle
 
     private HashMap<String, VehicleService> mServices;
 
+    /**
+     * The interface Service bundle listener.
+     */
     public interface ServiceBundleListener
     {
+        /**
+         * On service updated.
+         *
+         * @param serviceIdentifier the service identifier
+         * @param value the value
+         */
         public void onServiceUpdated(String serviceIdentifier, Object value);
     }
 
     private ServiceBundleListener mListener;
 
+    /**
+     * Instantiates a new Service bundle.
+     *
+     * @param context the context
+     * @param domain the domain
+     * @param bundleIdentifier the bundle identifier
+     * @param servicesIdentifiers the services identifiers
+     */
     public ServiceBundle(Context context, String domain, String bundleIdentifier, /*String remotePrefix,*/ ArrayList<String> servicesIdentifiers) {
         mBundleIdentifier = bundleIdentifier;
         mDomain = domain;
@@ -62,6 +82,12 @@ public class ServiceBundle
         return new VehicleService(serviceIdentifier, mDomain, mBundleIdentifier, null, localPrefix);//mRemotePrefix, mLocalPrefix);
     }
 
+    /**
+     * Gets service.
+     *
+     * @param serviceIdentifier the service identifier
+     * @return the service
+     */
     public VehicleService getService(String serviceIdentifier) {
 //        for (VehicleService service : mServices)
 //            if (service.getServiceIdentifier().equals(serviceIdentifier) || service.getServiceIdentifier()
@@ -80,6 +106,13 @@ public class ServiceBundle
         return service;
     }
 
+    /**
+     * Update service.
+     *
+     * @param serviceIdentifier the service identifier
+     * @param parameters the parameters
+     * @param timeout the timeout
+     */
     public void updateService(String serviceIdentifier, Object parameters, Long timeout) {
         VehicleService service = getService(serviceIdentifier);
 
@@ -91,6 +124,11 @@ public class ServiceBundle
         RVINode.updateService(service);
     }
 
+    /**
+     * Service updated.
+     *
+     * @param service the service
+     */
     public void serviceUpdated(VehicleService service) {
 //        VehicleService ourService = getService(service.getServiceIdentifier());
 //
@@ -119,14 +157,29 @@ public class ServiceBundle
 //        return mListener;
 //    }
 
+    /**
+     * Sets listener.
+     *
+     * @param listener the listener
+     */
     public void setListener(ServiceBundleListener listener) {
         mListener = listener;
     }
 
+    /**
+     * Gets services.
+     *
+     * @return the services
+     */
     public HashMap<String, VehicleService> getServices() {
         return mServices;
     }
 
+    /**
+     * Gets local services.
+     *
+     * @return the local services
+     */
     public ArrayList<VehicleService> getLocalServices() {
         ArrayList<VehicleService> localServices = new ArrayList<>(mServices.size());
         for (VehicleService service : mServices.values())
@@ -136,6 +189,11 @@ public class ServiceBundle
         return localServices;
     }
 
+    /**
+     * Gets remote services.
+     *
+     * @return the remote services
+     */
     public ArrayList<VehicleService> getRemoteServices() {
         ArrayList<VehicleService> remoteServices = new ArrayList<>(mServices.size());
         for (VehicleService service : mServices.values())
@@ -145,6 +203,11 @@ public class ServiceBundle
         return remoteServices;
     }
 
+    /**
+     * Gets bundle identifier.
+     *
+     * @return the bundle identifier
+     */
     public String getBundleIdentifier() {
         return mBundleIdentifier;
     }

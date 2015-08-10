@@ -20,6 +20,9 @@ import com.google.gson.annotations.SerializedName;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/**
+ * The type Dlink service announce packet.
+ */
 class DlinkServiceAnnouncePacket extends DlinkPacket
 {
     private final static String TAG = "RVI:DlinkServi...Packet";
@@ -38,6 +41,9 @@ class DlinkServiceAnnouncePacket extends DlinkPacket
         return newList;
     }
 
+    /**
+     * Instantiates a new Dlink service announce packet.
+     */
     DlinkServiceAnnouncePacket() {
     }
 
@@ -45,7 +51,6 @@ class DlinkServiceAnnouncePacket extends DlinkPacket
      * Helper method to get a service announce dlink json object
      *
      * @param services The array of services to announce
-     *
      */
     DlinkServiceAnnouncePacket(ArrayList<VehicleService> services) {
         super(Command.SERVICE_ANNOUNCE);
@@ -54,6 +59,11 @@ class DlinkServiceAnnouncePacket extends DlinkPacket
         mServices = getServiceFQNames(services);
     }
 
+    /**
+     * Gets services.
+     *
+     * @return the services
+     */
     ArrayList<String> getServices() {
         return mServices;
     }

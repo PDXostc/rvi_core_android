@@ -16,6 +16,9 @@ package com.jaguarlandrover.rvi;
 
 import android.util.Log;
 
+/**
+ * The type Remote connection manager.
+ */
 public class RemoteConnectionManager
 {
     private final static String TAG = "RVI:RemoteCon...Manager";
@@ -78,6 +81,9 @@ public class RemoteConnectionManager
         mDirectServerConnection.setRemoteConnectionListener(connectionListener);
     }
 
+    /**
+     * Connect void.
+     */
     static void connect() {
         ourInstance.closeConnections();
 
@@ -88,11 +94,19 @@ public class RemoteConnectionManager
         remoteConnection.connect();
     }
 
+    /**
+     * Disconnect void.
+     */
     static void disconnect() {
         ourInstance.closeConnections();
         ourInstance.mDataParser.clear();
     }
 
+    /**
+     * Send packet.
+     *
+     * @param dlinkPacket the dlink packet
+     */
     static void sendPacket(DlinkPacket dlinkPacket) {
         Log.d(TAG, Util.getMethodName());
 
@@ -128,18 +142,38 @@ public class RemoteConnectionManager
         mBluetoothConnection.disconnect();
     }
 
+    /**
+     * Sets server url.
+     *
+     * @param serverUrl the server url
+     */
     public static void setServerUrl(String serverUrl) {
         RemoteConnectionManager.ourInstance.mDirectServerConnection.setServerUrl(serverUrl);
     }
 
+    /**
+     * Sets server port.
+     *
+     * @param serverPort the server port
+     */
     public static void setServerPort(Integer serverPort) {
         RemoteConnectionManager.ourInstance.mDirectServerConnection.setServerPort(serverPort);
     }
 
+    /**
+     * Gets listener.
+     *
+     * @return the listener
+     */
     static RemoteConnectionManagerListener getListener() {
         return RemoteConnectionManager.ourInstance.mListener;
     }
 
+    /**
+     * Sets listener.
+     *
+     * @param listener the listener
+     */
     static void setListener(RemoteConnectionManagerListener listener) {
         RemoteConnectionManager.ourInstance.mListener = listener;
     }

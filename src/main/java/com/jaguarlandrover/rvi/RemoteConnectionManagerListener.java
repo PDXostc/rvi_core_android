@@ -1,5 +1,8 @@
 package com.jaguarlandrover.rvi;
 
+/**
+ * The interface Remote connection manager listener.
+ */
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
  * Copyright (c) 2015 Jaguar Land Rover.
@@ -16,15 +19,39 @@ package com.jaguarlandrover.rvi;
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 interface RemoteConnectionManagerListener
 {
+    /**
+     * On rVI did connect.
+     */
     void onRVIDidConnect();
 
+    /**
+     * On rVI did fail to connect.
+     *
+     * @param error the error
+     */
     void onRVIDidFailToConnect(Error error);
 
+    /**
+     * On rVI did disconnect.
+     */
     void onRVIDidDisconnect();
 
+    /**
+     * On rVI did receive packet.
+     *
+     * @param packet the packet
+     */
     void onRVIDidReceivePacket(DlinkPacket packet);
 
+    /**
+     * On rVI did send packet.
+     */
     void onRVIDidSendPacket();
 
+    /**
+     * On rVI did fail to send packet.
+     *
+     * @param error the error
+     */
     void onRVIDidFailToSendPacket(Error error);
 }

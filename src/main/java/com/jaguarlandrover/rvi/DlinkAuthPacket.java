@@ -18,6 +18,9 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.HashMap;
 
+/**
+ * The type Dlink auth packet.
+ */
 class DlinkAuthPacket extends DlinkPacket
 {
     private final static String TAG = "RVI:DlinkAuthPacket";

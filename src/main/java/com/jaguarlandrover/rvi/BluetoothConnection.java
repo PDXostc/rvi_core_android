@@ -14,6 +14,9 @@ package com.jaguarlandrover.rvi;
  *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/**
+ * The type Bluetooth connection.
+ */
 class BluetoothConnection implements RemoteConnectionInterface
 {
     private final static String TAG = "RVI:BluetoothConnection";
