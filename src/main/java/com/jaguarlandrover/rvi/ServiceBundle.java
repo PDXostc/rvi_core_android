@@ -29,11 +29,16 @@ public class ServiceBundle
 
     private String mBundleIdentifier;
     private String mDomain;
+    private String mLocalNodeIdentifier;
 
 //    private String mRemotePrefix;
 //    private String mLocalPrefix;
 
-    private HashMap<String, VehicleService> mServices;
+    private HashMap<String, VehicleService> mLocalServices;
+
+    private HashMap<String, VehicleService> mRemoteServices = new HashMap<>();
+
+    private HashMap<String, VehicleService> mPendingServiceUpdates = new HashMap<>();
 
     /**
      * The Service bundle listener interface.
@@ -59,28 +64,47 @@ public class ServiceBundle
      * @param bundleIdentifier the bundle identifier (e.g., "hvac")
      * @param servicesIdentifiers a list of the identifiers for all the local services
      */
-    public ServiceBundle(Context context, String domain, String bundleIdentifier, /*String remotePrefix,*/ ArrayList<String> servicesIdentifiers) {
-        mBundleIdentifier = bundleIdentifier; // TODO: If no '/' prefix, add one
+    public ServiceBundle(Context context, String domain, String bundleIdentifier, ArrayList<String> servicesIdentifiers) {
         mDomain = domain;
+        mBundleIdentifier = bundleIdentifier; // TODO: If no '/' prefix, add one
+        mLocalNodeIdentifier = RVINode.getLocalNodeIdentifier(context);
 
-        //mRemotePrefix = remotePrefix;
-        //mLocalPrefix = RVINode.getLocalServicePrefix(context);
-        //"/android/" + UUID.randomUUID().toString();//987654321"; // TODO: Generate randomly
-
-        mServices = makeServices(servicesIdentifiers, RVINode.getLocalServicePrefix(context));
+        mLocalServices = makeServices(servicesIdentifiers);
     }
 
-    private HashMap<String, VehicleService> makeServices(ArrayList<String> serviceIdentifiers, String localPrefix) {
+    private HashMap<String, VehicleService> makeServices(ArrayList<String> serviceIdentifiers) {
         HashMap<String, VehicleService> services = new HashMap<>(serviceIdentifiers.size());
         for (String serviceIdentifier : serviceIdentifiers)
-            services.put(serviceIdentifier, makeService(serviceIdentifier, localPrefix));
+            services.put(serviceIdentifier, new VehicleService(serviceIdentifier, mDomain, mBundleIdentifier, mLocalNodeIdentifier));
 
         return services;
     }
 
-    private VehicleService makeService(String serviceIdentifier, String localPrefix) {
-        return new VehicleService(serviceIdentifier, mDomain, mBundleIdentifier, null, localPrefix);//mRemotePrefix, mLocalPrefix);
-    }
+//    /**
+//     * Gets the service object, given the service identifier. If one does not exist with that identifier, it is created,
+//     * and added to the list of bundle's services. If it is created, it is assumed that it is not local, and therefore
+//     * the bundle does not announce it's services.
+//     *
+//     * @param serviceIdentifier the service identifier
+//     * @return the service
+//     */
+//    VehicleService getLocalService(String serviceIdentifier) {
+////        for (VehicleService service : mLocalServices)
+////            if (service.getServiceIdentifier().equals(serviceIdentifier) || service.getServiceIdentifier()
+////                                                                                   .equals("/" + serviceIdentifier))
+////                return service;
+//
+//        VehicleService service;
+//        if (null != (service = mLocalServices.get(serviceIdentifier)))
+//            return service;
+//
+//        if (null != (service = mLocalServices.get("/" + serviceIdentifier)))
+//            return service;
+//
+//        mLocalServices.put(serviceIdentifier, service = new VehicleService(serviceIdentifier, mDomain, mBundleIdentifier, null));
+//
+//        return service;
+//    }
 
     /**
      * Gets the service object, given the service identifier. If one does not exist with that identifier, it is created,
@@ -90,25 +114,93 @@ public class ServiceBundle
      * @param serviceIdentifier the service identifier
      * @return the service
      */
-    VehicleService getService(String serviceIdentifier) {
-//        for (VehicleService service : mServices)
-//            if (service.getServiceIdentifier().equals(serviceIdentifier) || service.getServiceIdentifier()
-//                                                                                   .equals("/" + serviceIdentifier))
-//                return service;
-
+    VehicleService getRemoteService(String serviceIdentifier) {
         VehicleService service;
-        if (null != (service = mServices.get(serviceIdentifier)))
+        if (null != (service = mRemoteServices.get(serviceIdentifier)))
             return service;
 
-        if (null != (service = mServices.get("/" + serviceIdentifier)))
+        if (null != (service = mRemoteServices.get("/" + serviceIdentifier)))
             return service;
 
-        mServices.put(serviceIdentifier, service = new VehicleService(serviceIdentifier, mDomain, mBundleIdentifier, null, null));
-
-        return service;
+        return new VehicleService(serviceIdentifier, mDomain, mBundleIdentifier, null);
     }
 
-    // TODO: Add a method for adding/removing services (which also announces to remote node)
+    /**
+     * Add a local service to the service bundle. Adding services triggers a service-announce by the local RVI node.
+     * @param serviceIdentifier the identifier of the service
+     */
+    public void addLocalService(String serviceIdentifier) {
+        if (!mLocalServices.containsKey(serviceIdentifier))
+            mLocalServices.put(serviceIdentifier, new VehicleService(serviceIdentifier, mDomain, mBundleIdentifier, mLocalNodeIdentifier));
+
+        RVINode.announceServices();
+    }
+
+    /**
+     * Add several local services to the service bundle. Adding services triggers a service-announce by the local RVI node.
+     * @param serviceIdentifiers a list of service identifiers
+     */
+    public void addLocalServices(ArrayList<String> serviceIdentifiers) {
+        for (String serviceIdentifier : serviceIdentifiers)
+            mLocalServices.put(serviceIdentifier, new VehicleService(serviceIdentifier, mDomain, mBundleIdentifier, mLocalNodeIdentifier));
+
+        RVINode.announceServices();
+    }
+
+    /**
+     * Remote a local service from the service bundle. Removing services triggers a service-announce by the local RVI node.
+     * @param serviceIdentifier the identifier of the service
+     */
+    public void removeLocalService(String serviceIdentifier) {
+        mLocalServices.remove(serviceIdentifier);
+
+        RVINode.announceServices();
+    }
+
+    /**
+     * Removes all the local services from the service bundle. Removing services triggers a service-announce by the local RVI node.
+     */
+    public void removeAllLocalServices() {
+        mLocalServices.clear();
+
+        RVINode.announceServices();
+    }
+
+    /**
+     * Add a remote service to the service bundle. If there is a pending service update with a matching service
+     * identifier, this update is sent to the remote node.
+     *
+     * @param serviceIdentifier the identifier of the service
+     */
+    void addRemoteService(String serviceIdentifier, String remoteNodeIdentifier) {
+        if (!mRemoteServices.containsKey(serviceIdentifier))
+            mRemoteServices.put(serviceIdentifier, new VehicleService(serviceIdentifier, mDomain, mBundleIdentifier, remoteNodeIdentifier));
+
+        VehicleService pendingServiceUpdate = mPendingServiceUpdates.get(serviceIdentifier);
+        if (pendingServiceUpdate != null) {
+            if (pendingServiceUpdate.getTimeout() >= System.currentTimeMillis()) {
+                pendingServiceUpdate.setNodeIdentifier(remoteNodeIdentifier);
+                RVINode.updateService(pendingServiceUpdate);
+            }
+
+            mPendingServiceUpdates.remove(serviceIdentifier);
+        }
+    }
+
+    /**
+     * Remote a remote service from the service bundle.
+     * @param serviceIdentifier the identifier of the service
+     */
+    void removeRemoteService(String serviceIdentifier) {
+        mRemoteServices.remove(serviceIdentifier);
+    }
+
+    /**
+     * Remove all remote services from the service bundle.
+     */
+    void removeAllRemoteServices() {
+        mRemoteServices.clear();
+    }
 
     /**
      * Update a remote service on the remote RVI node
@@ -118,14 +210,17 @@ public class ServiceBundle
      * @param timeout the timeout
      */
     public void updateService(String serviceIdentifier, Object parameters, Long timeout) {
-        VehicleService service = getService(serviceIdentifier);
 
-        //if (service == null) mServices.put(serviceIdentifier, service = new VehicleService(serviceIdentifier, mBundleIdentifier, mDomain, null, null));
+
+        VehicleService service = getRemoteService(serviceIdentifier);
 
         service.setParameters(parameters);
         service.setTimeout(timeout);
 
-        RVINode.updateService(service);
+        if (service.hasNodeIdentifier())
+            RVINode.updateService(service);
+        else
+            mPendingServiceUpdates.put(serviceIdentifier, service);
     }
 
     /**
@@ -134,32 +229,8 @@ public class ServiceBundle
      * @param service the service
      */
     void serviceUpdated(VehicleService service) {
-//        VehicleService ourService = getService(service.getServiceIdentifier());
-//
-//        ourService.setParameters(service.getParameters());
-
         if (mListener != null) mListener.onServiceUpdated(service.getServiceIdentifier(), service.getParameters()); // TODO: This code can pass through a service that might not exist locally
     }
-
-//    public String getDomain() {
-//        return mDomain;
-//    }
-
-//    public String getRemotePrefix() {
-//        return mRemotePrefix;
-//    }
-//
-//    public void setRemotePrefix(String remotePrefix) {
-//        mRemotePrefix = remotePrefix;
-//        //mServices.removeAll(mServices);
-//
-//        for (VehicleService service : mServices)
-//            service.setRemotePrefix(remotePrefix);
-//    }
-
-//    public ServiceBundleListener getListener() {
-//        return mListener;
-//    }
 
     /**
      * Sets the @ServiceBundleListener listener.
@@ -171,41 +242,33 @@ public class ServiceBundle
     }
 
     /**
-     * Gets services.
-     *
-     * @return the services
-     */
-    HashMap<String, VehicleService> getServices() {
-        return mServices;
-    }
-
-    /**
-     * Gets local services.
+     * Gets a list of fully-qualified services names of all the local services.
      *
      * @return the local services
      */
-    ArrayList<VehicleService> getLocalServices() {
-        ArrayList<VehicleService> localServices = new ArrayList<>(mServices.size());
-        for (VehicleService service : mServices.values())
-            if (service.getFullyQualifiedLocalServiceName() != null)
-                localServices.add(service);
+    ArrayList<String> getFullyQualifiedLocalServiceNames() {
+        ArrayList<String> fullyQualifiedLocalServiceNames = new ArrayList<>(mLocalServices.size());
+        for (VehicleService service : mLocalServices.values())
+            if (service.getFullyQualifiedServiceName() != null)
+                fullyQualifiedLocalServiceNames.add(service.getFullyQualifiedServiceName());
 
-        return localServices;
+        return fullyQualifiedLocalServiceNames;
     }
 
-    /**
-     * Gets remote services.
-     *
-     * @return the remote services
-     */
-    ArrayList<VehicleService> getRemoteServices() {
-        ArrayList<VehicleService> remoteServices = new ArrayList<>(mServices.size());
-        for (VehicleService service : mServices.values())
-            if (service.getFullyQualifiedRemoteServiceName() != null)
-                remoteServices.add(service);
-
-        return remoteServices;
-    }
+//    /**
+//     * Gets remote services.
+//     *
+//     * @return the remote services
+//     */
+//    ArrayList<VehicleService> getRemoteServices() {
+////        ArrayList<VehicleService> remoteServices = new ArrayList<>(mLocalServices.size());
+////        for (VehicleService service : mLocalServices.values())
+////            if (service.getFullyQualifiedRemoteServiceName() != null)
+////                remoteServices.add(service);
+////
+////        return remoteServices;
+//        return new ArrayList<>(mRemoteServices.values());
+//    }
 
     /**
      * Gets bundle identifier.
@@ -216,7 +279,4 @@ public class ServiceBundle
         return mBundleIdentifier;
     }
 
-//    public void setAppIdentifier(String appIdentifier) {
-//        mBundleIdentifier = appIdentifier;
-//    }
 }

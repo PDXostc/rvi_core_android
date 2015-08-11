@@ -62,34 +62,14 @@ public class RVINode
                 if (packet == null) return;
 
                 if (packet.getClass().equals(DlinkReceivePacket.class)) {
-                    VehicleService service = ((DlinkReceivePacket) packet).getService();
+                    handleReceivePacket((DlinkReceivePacket) packet);
 
-                    allServiceBundles.get(service.getBundleIdentifier()).serviceUpdated(service);
+                } else if (packet.getClass().equals(DlinkServiceAnnouncePacket.class)) {
+                    handleServiceAnnouncePacket((DlinkServiceAnnouncePacket) packet);
 
-                } else if (packet.getClass().equals(DlinkServiceAnnouncePacket.class)) { // TODO: Handle 'remove service' dlink packet, and handle case where new SA packet doesn't announce all the previous services
-                    for (String fullyQualifiedRemoteServiceName : ((DlinkServiceAnnouncePacket) packet).getServices()) {
+                } else if (packet.getClass().equals(DlinkAuthPacket.class)) {
+                    handleAuthPacket((DlinkAuthPacket) packet);
 
-                        String[] serviceParts = fullyQualifiedRemoteServiceName.split("/");
-
-                        if (serviceParts.length != 5) return;
-
-                        String remotePrefix = "/" + serviceParts[1] + "/" + serviceParts[2];
-                        String appIdentifier = "/" + serviceParts[3];
-                        String serviceIdentifier = "/" + serviceParts[4];
-
-                        allServiceBundles.get(appIdentifier).getService(serviceIdentifier).setRemotePrefix(remotePrefix);
-                    }
-
-                    for (VehicleService service : pendingServiceUpdates) {
-                        if (service.hasRemotePrefix() && service.getTimeout() >= System.currentTimeMillis()) {
-                            RemoteConnectionManager.sendPacket(new DlinkReceivePacket(service));
-
-                            pendingServiceUpdates.remove(service);
-
-                        } else if (service.getTimeout() < System.currentTimeMillis()) {
-                            pendingServiceUpdates.remove(service);
-                        }
-                    }
                 }
             }
 
@@ -107,11 +87,7 @@ public class RVINode
 
     private static HashMap<String, ServiceBundle> allServiceBundles = new HashMap<>();
 
-    private static HashSet<VehicleService> pendingServiceUpdates = new HashSet<>();
-
-    //public static RVINodeListener getListener() {
-    //    return ourInstance.mListener;
-    //}
+    //private static HashMap<String, VehicleService> pendingServiceUpdates = new HashMap<>();
 
     /**
      * Sets the @RVINodeListener listener.
@@ -187,10 +163,13 @@ public class RVINode
         RVINode.announceServices();
     }
 
-    private static void announceServices() {
-        ArrayList<VehicleService> allServices = new ArrayList<>();
+    /**
+     * Have the local node announce all it's available services.
+     */
+    static void announceServices() {
+        ArrayList<String> allServices = new ArrayList<>();
         for (ServiceBundle bundle : allServiceBundles.values())
-            allServices.addAll(bundle.getLocalServices());
+            allServices.addAll(bundle.getFullyQualifiedLocalServiceNames());
 
         RemoteConnectionManager.sendPacket(new DlinkServiceAnnouncePacket(allServices));
     }
@@ -201,11 +180,39 @@ public class RVINode
      * @param service the service
      */
     static void updateService(VehicleService service) {
-        if (service.hasRemotePrefix()) {
+        //if (service.hasNodeIdentifier()) {
             RemoteConnectionManager.sendPacket(new DlinkReceivePacket(service));
-        } else {
-            pendingServiceUpdates.add(service);
+        //} else {
+        //    pendingServiceUpdates.put(service.getServiceIdentifier(), service);
+        //}
+    }
+
+    private void handleReceivePacket(DlinkReceivePacket packet) {
+        VehicleService service = packet.getService();
+
+        allServiceBundles.get(service.getBundleIdentifier()).serviceUpdated(service);
+    }
+
+    private void handleServiceAnnouncePacket(DlinkServiceAnnouncePacket packet) {
+        for (String fullyQualifiedRemoteServiceName : packet.getServices()) {
+
+            String[] serviceParts = fullyQualifiedRemoteServiceName.split("/");
+
+            if (serviceParts.length != 5) return;
+
+            String nodeIdentifier = "/" + serviceParts[1] + "/" + serviceParts[2];
+            String bundleIdentifier = "/" + serviceParts[3];
+            String serviceIdentifier = "/" + serviceParts[4];
+
+            ServiceBundle bundle = allServiceBundles.get(bundleIdentifier);
+
+            if (bundle != null)
+                bundle.addRemoteService(serviceIdentifier, nodeIdentifier);
         }
+    }
+
+    private void handleAuthPacket(DlinkAuthPacket packet) {
+
     }
 
     private final static String SHARED_PREFS_STRING         = "com.rvisdk.settings";
@@ -235,7 +242,7 @@ public class RVINode
      * @param context the application context
      * @return the local prefix
      */
-    public static String getLocalServicePrefix(Context context) {
+    public static String getLocalNodeIdentifier(Context context) {
         SharedPreferences sharedPrefs = context.getSharedPreferences(SHARED_PREFS_STRING, MODE_PRIVATE);
         String localServicePrefix;
 
