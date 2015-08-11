@@ -31,9 +31,6 @@ public class ServiceBundle
     private String mDomain;
     private String mLocalNodeIdentifier;
 
-//    private String mRemotePrefix;
-//    private String mLocalPrefix;
-
     private HashMap<String, VehicleService> mLocalServices;
 
     private HashMap<String, VehicleService> mRemoteServices = new HashMap<>();
@@ -67,6 +64,7 @@ public class ServiceBundle
     public ServiceBundle(Context context, String domain, String bundleIdentifier, ArrayList<String> servicesIdentifiers) {
         mDomain = domain;
         mBundleIdentifier = bundleIdentifier; // TODO: If no '/' prefix, add one
+
         mLocalNodeIdentifier = RVINode.getLocalNodeIdentifier(context);
 
         mLocalServices = makeServices(servicesIdentifiers);
@@ -80,36 +78,8 @@ public class ServiceBundle
         return services;
     }
 
-//    /**
-//     * Gets the service object, given the service identifier. If one does not exist with that identifier, it is created,
-//     * and added to the list of bundle's services. If it is created, it is assumed that it is not local, and therefore
-//     * the bundle does not announce it's services.
-//     *
-//     * @param serviceIdentifier the service identifier
-//     * @return the service
-//     */
-//    VehicleService getLocalService(String serviceIdentifier) {
-////        for (VehicleService service : mLocalServices)
-////            if (service.getServiceIdentifier().equals(serviceIdentifier) || service.getServiceIdentifier()
-////                                                                                   .equals("/" + serviceIdentifier))
-////                return service;
-//
-//        VehicleService service;
-//        if (null != (service = mLocalServices.get(serviceIdentifier)))
-//            return service;
-//
-//        if (null != (service = mLocalServices.get("/" + serviceIdentifier)))
-//            return service;
-//
-//        mLocalServices.put(serviceIdentifier, service = new VehicleService(serviceIdentifier, mDomain, mBundleIdentifier, null));
-//
-//        return service;
-//    }
-
     /**
-     * Gets the service object, given the service identifier. If one does not exist with that identifier, it is created,
-     * and added to the list of bundle's services. If it is created, it is assumed that it is not local, and therefore
-     * the bundle does not announce it's services.
+     * Gets the service object, given the service identifier. If one does not exist with that identifier, it is created.
      *
      * @param serviceIdentifier the service identifier
      * @return the service
@@ -210,8 +180,6 @@ public class ServiceBundle
      * @param timeout the timeout
      */
     public void updateService(String serviceIdentifier, Object parameters, Long timeout) {
-
-
         VehicleService service = getRemoteService(serviceIdentifier);
 
         service.setParameters(parameters);
@@ -254,21 +222,6 @@ public class ServiceBundle
 
         return fullyQualifiedLocalServiceNames;
     }
-
-//    /**
-//     * Gets remote services.
-//     *
-//     * @return the remote services
-//     */
-//    ArrayList<VehicleService> getRemoteServices() {
-////        ArrayList<VehicleService> remoteServices = new ArrayList<>(mLocalServices.size());
-////        for (VehicleService service : mLocalServices.values())
-////            if (service.getFullyQualifiedRemoteServiceName() != null)
-////                remoteServices.add(service);
-////
-////        return remoteServices;
-//        return new ArrayList<>(mRemoteServices.values());
-//    }
 
     /**
      * Gets bundle identifier.

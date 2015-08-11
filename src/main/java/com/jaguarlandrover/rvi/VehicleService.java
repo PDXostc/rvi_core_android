@@ -110,22 +110,13 @@ class VehicleService
     }
 
     /**
-     * Gets fully qualified local service name.
+     * Gets fully qualified service name.
      *
-     * @return the fully qualified local service name
+     * @return the fully qualified service name
      */
     String getFullyQualifiedServiceName() {
         return mDomain + mNodeIdentifier + mBundleIdentifier + mServiceIdentifier;
     }
-
-//    /**
-//     * Gets fully qualified remote service name.
-//     *
-//     * @return the fully qualified remote service name
-//     */
-//    String getFullyQualifiedRemoteServiceName() {
-//        return mDomain + mRemotePrefix + mBundleIdentifier + mServiceIdentifier;
-//    }
 
     /**
      * Has the node identifier portion of the fully-qualified service name. This happens if the remote node is
@@ -174,15 +165,6 @@ class VehicleService
      */
     String getBundleIdentifier() {
         return mBundleIdentifier;
-    }
-
-    /**
-     * Gets remote prefix.
-     *
-     * @return the remote prefix
-     */
-    String getRemotePrefix() {
-        return mNodeIdentifier;
     }
 
     /**

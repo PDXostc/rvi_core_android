@@ -34,6 +34,7 @@ public class RVINode
     private final static String TAG = "RVI:RVINode";
 
     private static RVINode ourInstance = new RVINode();
+    private static HashMap<String, ServiceBundle> allServiceBundles = new HashMap<>();
 
     private RVINode() {
         RemoteConnectionManager.setListener(new RemoteConnectionManagerListener()
@@ -84,10 +85,6 @@ public class RVINode
             }
         });
     }
-
-    private static HashMap<String, ServiceBundle> allServiceBundles = new HashMap<>();
-
-    //private static HashMap<String, VehicleService> pendingServiceUpdates = new HashMap<>();
 
     /**
      * Sets the @RVINodeListener listener.
@@ -180,11 +177,7 @@ public class RVINode
      * @param service the service
      */
     static void updateService(VehicleService service) {
-        //if (service.hasNodeIdentifier()) {
-            RemoteConnectionManager.sendPacket(new DlinkReceivePacket(service));
-        //} else {
-        //    pendingServiceUpdates.put(service.getServiceIdentifier(), service);
-        //}
+        RemoteConnectionManager.sendPacket(new DlinkReceivePacket(service));
     }
 
     private void handleReceivePacket(DlinkReceivePacket packet) {
