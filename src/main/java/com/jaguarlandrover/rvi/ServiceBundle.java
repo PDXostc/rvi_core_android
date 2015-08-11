@@ -21,7 +21,7 @@ import java.util.HashMap;
 
 
 /**
- * The type Service bundle.
+ * The bundle of related services, a.k.a. an application. For example "body" or "hvac".
  */
 public class ServiceBundle
 {
@@ -36,17 +36,17 @@ public class ServiceBundle
     private HashMap<String, VehicleService> mServices;
 
     /**
-     * The interface Service bundle listener.
+     * The Service bundle listener interface.
      */
     public interface ServiceBundleListener
     {
         /**
-         * On service updated.
+         * Callback for when a local service belonging to the bundle was updated.
          *
          * @param serviceIdentifier the service identifier
-         * @param value the value
+         * @param parameters the parameters receieved in the update
          */
-        public void onServiceUpdated(String serviceIdentifier, Object value);
+        public void onServiceUpdated(String serviceIdentifier, Object parameters);
     }
 
     private ServiceBundleListener mListener;
@@ -54,13 +54,13 @@ public class ServiceBundle
     /**
      * Instantiates a new Service bundle.
      *
-     * @param context the context
-     * @param domain the domain
-     * @param bundleIdentifier the bundle identifier
-     * @param servicesIdentifiers the services identifiers
+     * @param context the Application context
+     * @param domain the domain portion of the RVI node's prefix (e.g., "jlr.com")
+     * @param bundleIdentifier the bundle identifier (e.g., "hvac")
+     * @param servicesIdentifiers a list of the identifiers for all the local services
      */
     public ServiceBundle(Context context, String domain, String bundleIdentifier, /*String remotePrefix,*/ ArrayList<String> servicesIdentifiers) {
-        mBundleIdentifier = bundleIdentifier;
+        mBundleIdentifier = bundleIdentifier; // TODO: If no '/' prefix, add one
         mDomain = domain;
 
         //mRemotePrefix = remotePrefix;
@@ -83,12 +83,14 @@ public class ServiceBundle
     }
 
     /**
-     * Gets service.
+     * Gets the service object, given the service identifier. If one does not exist with that identifier, it is created,
+     * and added to the list of bundle's services. If it is created, it is assumed that it is not local, and therefore
+     * the bundle does not announce it's services.
      *
      * @param serviceIdentifier the service identifier
      * @return the service
      */
-    public VehicleService getService(String serviceIdentifier) {
+    VehicleService getService(String serviceIdentifier) {
 //        for (VehicleService service : mServices)
 //            if (service.getServiceIdentifier().equals(serviceIdentifier) || service.getServiceIdentifier()
 //                                                                                   .equals("/" + serviceIdentifier))
@@ -106,8 +108,10 @@ public class ServiceBundle
         return service;
     }
 
+    // TODO: Add a method for adding/removing services (which also announces to remote node)
+
     /**
-     * Update service.
+     * Update a remote service on the remote RVI node
      *
      * @param serviceIdentifier the service identifier
      * @param parameters the parameters
@@ -129,7 +133,7 @@ public class ServiceBundle
      *
      * @param service the service
      */
-    public void serviceUpdated(VehicleService service) {
+    void serviceUpdated(VehicleService service) {
 //        VehicleService ourService = getService(service.getServiceIdentifier());
 //
 //        ourService.setParameters(service.getParameters());
@@ -158,7 +162,7 @@ public class ServiceBundle
 //    }
 
     /**
-     * Sets listener.
+     * Sets the @ServiceBundleListener listener.
      *
      * @param listener the listener
      */
@@ -171,7 +175,7 @@ public class ServiceBundle
      *
      * @return the services
      */
-    public HashMap<String, VehicleService> getServices() {
+    HashMap<String, VehicleService> getServices() {
         return mServices;
     }
 
@@ -180,7 +184,7 @@ public class ServiceBundle
      *
      * @return the local services
      */
-    public ArrayList<VehicleService> getLocalServices() {
+    ArrayList<VehicleService> getLocalServices() {
         ArrayList<VehicleService> localServices = new ArrayList<>(mServices.size());
         for (VehicleService service : mServices.values())
             if (service.getFullyQualifiedLocalServiceName() != null)
@@ -194,7 +198,7 @@ public class ServiceBundle
      *
      * @return the remote services
      */
-    public ArrayList<VehicleService> getRemoteServices() {
+    ArrayList<VehicleService> getRemoteServices() {
         ArrayList<VehicleService> remoteServices = new ArrayList<>(mServices.size());
         for (VehicleService service : mServices.values())
             if (service.getFullyQualifiedRemoteServiceName() != null)

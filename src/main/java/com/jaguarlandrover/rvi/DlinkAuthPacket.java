@@ -19,7 +19,7 @@ import com.google.gson.annotations.SerializedName;
 import java.util.HashMap;
 
 /**
- * The type Dlink auth packet.
+ * The Dlink "authorization" packet. This request is used to authorize an RVI node.
  */
 class DlinkAuthPacket extends DlinkPacket
 {
@@ -38,7 +38,7 @@ class DlinkAuthPacket extends DlinkPacket
     private String mCert;
 
     /**
-     * Helper method to get an authorization json object
+     * Default constructor
      */
     DlinkAuthPacket() {
         super(Command.AUTHORIZE);
@@ -48,14 +48,4 @@ class DlinkAuthPacket extends DlinkPacket
         mVer = "1.0";
         mCert = "";
     }
-
-//    public DlinkAuthPacket(HashMap jsonHash) {
-//        super(Command.AUTHORIZE, jsonHash);
-//
-//        mAddr = (String)  jsonHash.get("addr");
-//        mPort = ((Double) jsonHash.get("port")).intValue();
-//        mVer  = (String)  jsonHash.get("ver");
-//        mCert = (String)  jsonHash.get("cert");
-//    }
-
 }

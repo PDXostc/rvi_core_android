@@ -20,69 +20,69 @@ import com.google.gson.annotations.SerializedName;
 import java.util.HashMap;
 
 /**
- * The type Dlink packet.
+ * The Dlink request packet base class
  */
 class DlinkPacket
 {
     private final static String TAG = "RVI:DlinkPacket";
 
     /**
-     * The enum Command.
+     * The Command enumeration, used to enumerate the different commands, or dlink packet types
      */
     protected enum Command
     {
         /**
-         * The AUTHORIZE.
+         * The AUTHORIZE dlink packet type ("cmd":"au").
          */
         @SerializedName("au")AUTHORIZE("au"),
         /**
-         * The SERVICE_ANNOUNCE.
+         * The SERVICE_ANNOUNCE dlink packet type ("cmd":"sa").
          */
         @SerializedName("sa")SERVICE_ANNOUNCE("sa"),
         /**
-         * The RECEIVE.
+         * The RECEIVE dlink packet type ("cmd":"rcv").
          */
         @SerializedName("rcv")RECEIVE("rcv"),
         /**
-         * The PING.
+         * The PING dlink packet type ("cmd":"ping").
          */
         @SerializedName("ping")PING("ping");
 
         private final String mString;
 
         /**
-         * Instantiates a new Command.
+         * Instantiates a new Command enumerated string.
          *
-         * @param string the string
+         * @param string the string expected in the dlink request packet ("au", "sa", "rcv", or "ping")
          */
         Command(String string) {
             mString = string;
         }
     }
 
+    private static Integer tidCounter = 0;
+
     /**
-     * The TID.
+     * The transaction id.
      */
     @SerializedName("tid")
     protected Integer mTid = null;
 
     /**
-     * The cmd that was used in the request.
+     * The cmd that was used in the request ("au", "sa", "rcv", or "ping").
      */
     @SerializedName("cmd")
     protected Command mCmd = null;
 
     /**
-     * The M sig.
+     * The signature.
      */
     @SerializedName("sign")
     protected String mSig = null;
 
-    private static Integer tidCounter = 0;
-
     /**
      * Serializes the object into json strVal
-     * @return the string
+     * @return the serialized json string
      */
     protected String toJsonString() {
         Gson gson = new Gson();
@@ -98,7 +98,7 @@ class DlinkPacket
 
     /**
      * Base constructor of the DlinkPacket
-     * @param command the command
+     * @param command the command ("au", "sa", "rcv", or "ping")
      */
     protected DlinkPacket(Command command) {
         if (command == null) {
@@ -111,6 +111,7 @@ class DlinkPacket
         mSig = "";
     }
 
+    // TODO: 47765, probably need to remove this constructor and update tests
     /**
      * Instantiates a new Dlink packet.
      *

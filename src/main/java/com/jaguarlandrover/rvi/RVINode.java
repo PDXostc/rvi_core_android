@@ -27,7 +27,7 @@ import java.util.UUID;
 import static android.content.Context.MODE_PRIVATE;
 
 /**
- * The type RVI node.
+ * The local RVI node.
  */
 public class RVINode
 {
@@ -114,7 +114,7 @@ public class RVINode
     //}
 
     /**
-     * Sets listener.
+     * Sets the @RVINodeListener listener.
      *
      * @param listener the listener
      */
@@ -123,22 +123,22 @@ public class RVINode
     }
 
     /**
-     * The interface RVI node listener.
+     * The RVI node listener interface.
      */
     public interface RVINodeListener
     {
         /**
-         * Node did connect.
+         * Called when the local RVI node successfully connects to a remote RVI node.
          */
         public void nodeDidConnect();
 
         /**
-         * Node did fail to connect.
+         * Called when the local RVI node failed to connect to a remote RVI node.
          */
         public void nodeDidFailToConnect();
 
         /**
-         * Node did disconnect.
+         * Called when the local RVI node disconnects from a remote RVI node.
          */
         public void nodeDidDisconnect();
 
@@ -147,7 +147,7 @@ public class RVINode
     private RVINodeListener mListener;
 
     /**
-     * Connect void.
+     * Tells the local RVI node to connect to the remote RVI node.
      */
     public static void connect() {
         // are we configured
@@ -157,7 +157,7 @@ public class RVINode
     }
 
     /**
-     * Disconnect void.
+     * Tells the local RVI node to disconnect from the remote RVI node.
      */
     public static void disconnect() {
         // disconnect
@@ -166,7 +166,8 @@ public class RVINode
     }
 
     /**
-     * Add bundle.
+     * Add a service bundle to the local RVI node. Adding a service bundle triggers a service announce over the
+     * network to the remote RVI node.
      *
      * @param bundle the bundle
      */
@@ -176,7 +177,8 @@ public class RVINode
     }
 
     /**
-     * Remove bundle.
+     * Remove a service bundle from the local RVI node. Removing a service bundle triggers a service announce over the
+     * network to the remote RVI node.
      *
      * @param bundle the bundle
      */
@@ -198,7 +200,7 @@ public class RVINode
      *
      * @param service the service
      */
-    protected static void updateService(VehicleService service) {
+    static void updateService(VehicleService service) {
         if (service.hasRemotePrefix()) {
             RemoteConnectionManager.sendPacket(new DlinkReceivePacket(service));
         } else {
@@ -228,10 +230,10 @@ public class RVINode
     }
 
     /**
-     * Gets local service prefix.
+     * Gets the prefix of the local RVI node
      *
-     * @param context the context
-     * @return the local service prefix
+     * @param context the application context
+     * @return the local prefix
      */
     public static String getLocalServicePrefix(Context context) {
         SharedPreferences sharedPrefs = context.getSharedPreferences(SHARED_PREFS_STRING, MODE_PRIVATE);

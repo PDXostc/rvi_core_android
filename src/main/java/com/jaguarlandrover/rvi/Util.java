@@ -26,7 +26,7 @@ public class Util
     private static final String TAG = "RVI:Util";
 
     /**
-     * Gets method name.
+     * Gets the name of the current method on the stack.
      *
      * @return the method name
      */
@@ -35,7 +35,7 @@ public class Util
     }
 
     /**
-     * Print view.
+     * Print view information.
      *
      * @param view the view
      */

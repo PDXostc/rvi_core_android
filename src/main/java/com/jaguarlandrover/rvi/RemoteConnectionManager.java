@@ -17,7 +17,7 @@ package com.jaguarlandrover.rvi;
 import android.util.Log;
 
 /**
- * The type Remote connection manager.
+ * The remote connection manager of the RVI node.
  */
 public class RemoteConnectionManager
 {
@@ -82,7 +82,7 @@ public class RemoteConnectionManager
     }
 
     /**
-     * Connect void.
+     * Connect the local RVI node to the remote RVI node.
      */
     static void connect() {
         ourInstance.closeConnections();
@@ -95,7 +95,7 @@ public class RemoteConnectionManager
     }
 
     /**
-     * Disconnect void.
+     * Disconnect the local RVI node from the remote RVI node
      */
     static void disconnect() {
         ourInstance.closeConnections();
@@ -103,7 +103,7 @@ public class RemoteConnectionManager
     }
 
     /**
-     * Send packet.
+     * Send an RVI request packet.
      *
      * @param dlinkPacket the dlink packet
      */
@@ -143,7 +143,7 @@ public class RemoteConnectionManager
     }
 
     /**
-     * Sets server url.
+     * Sets the server url to the remote RVI node, when using a TCP/IP link to interface with a remote node.
      *
      * @param serverUrl the server url
      */
@@ -152,7 +152,7 @@ public class RemoteConnectionManager
     }
 
     /**
-     * Sets server port.
+     * Sets the server port of the remote RVI node, when using a TCP/IP link to interface with a remote node.
      *
      * @param serverPort the server port
      */
@@ -160,17 +160,17 @@ public class RemoteConnectionManager
         RemoteConnectionManager.ourInstance.mDirectServerConnection.setServerPort(serverPort);
     }
 
-    /**
-     * Gets listener.
-     *
-     * @return the listener
-     */
-    static RemoteConnectionManagerListener getListener() {
-        return RemoteConnectionManager.ourInstance.mListener;
-    }
+//    /**
+//     * Gets listener.
+//     *
+//     * @return the listener
+//     */
+//    static RemoteConnectionManagerListener getListener() {
+//        return RemoteConnectionManager.ourInstance.mListener;
+//    }
 
     /**
-     * Sets listener.
+     * Sets the remote connection manager listener.
      *
      * @param listener the listener
      */

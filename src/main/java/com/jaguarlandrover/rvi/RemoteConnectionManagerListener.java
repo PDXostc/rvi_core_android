@@ -20,36 +20,36 @@ package com.jaguarlandrover.rvi;
 interface RemoteConnectionManagerListener
 {
     /**
-     * On rVI did connect.
+     * On RVI did connect.
      */
     void onRVIDidConnect();
 
     /**
-     * On rVI did fail to connect.
+     * On RVI did fail to connect.
      *
      * @param error the error
      */
     void onRVIDidFailToConnect(Error error);
 
     /**
-     * On rVI did disconnect.
+     * On RVI did disconnect.
      */
     void onRVIDidDisconnect();
 
     /**
-     * On rVI did receive packet.
+     * On RVI did receive packet.
      *
      * @param packet the packet
      */
     void onRVIDidReceivePacket(DlinkPacket packet);
 
     /**
-     * On rVI did send packet.
+     * On RVI did send packet.
      */
     void onRVIDidSendPacket();
 
     /**
-     * On rVI did fail to send packet.
+     * On RVI did fail to send packet.
      *
      * @param error the error
      */

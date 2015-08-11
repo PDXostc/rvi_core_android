@@ -25,7 +25,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 /**
- * The type Server connection.
+ * The TCP/IP server @RemoteConnectionInterface implementation
  */
 class ServerConnection implements RemoteConnectionInterface
 {
@@ -36,7 +36,7 @@ class ServerConnection implements RemoteConnectionInterface
     private Integer mServerPort;
 
     /**
-     * The M socket.
+     * The socket.
      */
     Socket mSocket;
 
@@ -91,16 +91,16 @@ class ServerConnection implements RemoteConnectionInterface
 
     private class ConnectTask extends AsyncTask<Void, String, Void> {
         /**
-         * The Dst address.
+         * The destination address.
          */
         String dstAddress;
         /**
-         * The Dst port.
+         * The destination port.
          */
         int    dstPort;
 
         /**
-         * The Success.
+         * If the connection connected successfully or not.
          */
         boolean success = true;
 
@@ -206,7 +206,7 @@ class ServerConnection implements RemoteConnectionInterface
     private class SendDataTask extends AsyncTask<String, Void, Void>
     {
         /**
-         * The Success.
+         * If the connection sent the data successfully or not.
          */
         boolean success = true;
 

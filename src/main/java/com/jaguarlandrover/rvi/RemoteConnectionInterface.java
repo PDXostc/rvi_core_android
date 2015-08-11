@@ -15,38 +15,38 @@ package com.jaguarlandrover.rvi;
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /**
- * The interface Remote connection interface.
+ * The Remote connection interface.
  */
 interface RemoteConnectionInterface
 {
     /**
-     * Send rvi request.
+     * Send an rvi request.
      *
      * @param dlinkPacket the dlink packet
      */
     void sendRviRequest(DlinkPacket dlinkPacket);
 
     /**
-     * Is connected.
-     *
-     * @return the boolean
-     */
-    boolean isConnected();
-
-    /**
-     * Is enabled.
+     * Is the interface enabled.
      *
      * @return the boolean
      */
     boolean isEnabled();
 
     /**
-     * Connect void.
+     * Is the interface connected.
+     *
+     * @return the boolean
+     */
+    boolean isConnected();
+
+    /**
+     * Connect the interface.
      */
     void connect();
 
     /**
-     * Disconnect void.
+     * Disconnect the interface.
      */
     void disconnect();
 
@@ -56,44 +56,44 @@ interface RemoteConnectionInterface
      * @param remoteConnectionListener the remote connection listener
      */
     void setRemoteConnectionListener(RemoteConnectionListener remoteConnectionListener); // TODO: Probably bad architecture to expect interface implementations to correctly set and use an
+                                                                                         // TODO, cont: instance of the RemoteConnectionListener. Not sure what the best Java paradigm would be in this case
 
     /**
-     * The interface Remote connection listener.
+     * The remote connection listener interface.
      */
-// TODO, cont: instance of the RemoteConnectionListener. Not sure what the best Java paradigm would be in this case
     interface RemoteConnectionListener
     {
         /**
-         * On remote connection did connect.
+         * Callback method for when the remote connection did connect.
          */
         void onRemoteConnectionDidConnect();
 
         /**
-         * On remote connection did disconnect.
+         * Callback method for when the remote connection did disconnect.
          */
         void onRemoteConnectionDidDisconnect();
 
         /**
-         * On remote connection did fail to connect.
+         * Callback method for when the remote connection did fail to connect.
          *
          * @param error the error
          */
         void onRemoteConnectionDidFailToConnect(Error error);
 
         /**
-         * On remote connection did receive data.
+         * Callback method for when the remote connection did receive data.
          *
-         * @param data the data
+         * @param data the data that was received
          */
         void onRemoteConnectionDidReceiveData(String data);
 
         /**
-         * On did send data to remote connection.
+         * Callback method for when the remote connection did send data to the RVI node.
          */
         void onDidSendDataToRemoteConnection();
 
         /**
-         * On did fail to send data to remote connection.
+         * Callback method for when the the remote connection did fail to send data to the RVI node.
          *
          * @param error the error
          */

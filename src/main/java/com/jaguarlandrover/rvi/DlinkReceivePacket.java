@@ -20,7 +20,7 @@ import com.google.gson.annotations.SerializedName;
 import java.util.HashMap;
 
 /**
- * The type Dlink receive packet.
+ * The type Dlink "receive" request packet. This request is used to update RVI services.
  */
 class DlinkReceivePacket extends DlinkPacket
 {
@@ -34,10 +34,13 @@ class DlinkReceivePacket extends DlinkPacket
     private String mMod;
 
     /**
-     * The VehicleService used to create the request params
+     * The VehicleService used to create the request params.
      */
     private transient VehicleService mService;
 
+    /**
+     * The service is converted to a json string, then base64 encoded to be embedded in the packet's json.
+     */
     @SerializedName("data")
     private String mData;
 
@@ -48,7 +51,7 @@ class DlinkReceivePacket extends DlinkPacket
     }
 
     /**
-     * Helper method to get a receive dlink json object
+     * Helper method to get a receive dlink json object.
      *
      * @param service The service that is getting invoked
      */
@@ -69,9 +72,9 @@ class DlinkReceivePacket extends DlinkPacket
 //    }
 
     /**
-     * Gets service.
+     * Gets the service that is being updated over the network.
      *
-     * @return the service
+     * @return the service that is being updated
      */
     VehicleService getService() {
         if (mService == null && mData != null)
@@ -81,7 +84,7 @@ class DlinkReceivePacket extends DlinkPacket
     }
 
     /**
-     * Sets service.
+     * Sets the service that is being updated over the network.
      *
      * @param service the service
      */
