@@ -145,7 +145,7 @@ public class RVINode
      * @param bundle the bundle
      */
     public static void addBundle(ServiceBundle bundle) {
-        RVINode.allServiceBundles.put(bundle.getBundleIdentifier(), bundle);
+        RVINode.allServiceBundles.put(bundle.getDomain() + ":" + bundle.getBundleIdentifier(), bundle);
         RVINode.announceServices();
     }
 
@@ -156,7 +156,7 @@ public class RVINode
      * @param bundle the bundle
      */
     public static void removeBundle(ServiceBundle bundle) {
-        RVINode.allServiceBundles.remove(bundle.getBundleIdentifier());
+        RVINode.allServiceBundles.remove(bundle.getDomain() + ":" + bundle.getBundleIdentifier());
         RVINode.announceServices();
     }
 
@@ -183,7 +183,9 @@ public class RVINode
     private void handleReceivePacket(DlinkReceivePacket packet) {
         VehicleService service = packet.getService();
 
-        allServiceBundles.get(service.getBundleIdentifier()).serviceUpdated(service);
+        ServiceBundle bundle = allServiceBundles.get(service.getDomain() + ":" + service.getBundleIdentifier());
+        if (bundle != null)
+            bundle.serviceUpdated(service);
     }
 
     private void handleServiceAnnouncePacket(DlinkServiceAnnouncePacket packet) {
@@ -193,11 +195,12 @@ public class RVINode
 
             if (serviceParts.length != 5) return;
 
+            String domain = serviceParts[0];
             String nodeIdentifier = serviceParts[1] + "/" + serviceParts[2];
             String bundleIdentifier = serviceParts[3];
             String serviceIdentifier = serviceParts[4];
 
-            ServiceBundle bundle = allServiceBundles.get(bundleIdentifier);
+            ServiceBundle bundle = allServiceBundles.get(domain + ":" + bundleIdentifier);
 
             if (bundle != null)
                 bundle.addRemoteService(serviceIdentifier, nodeIdentifier);

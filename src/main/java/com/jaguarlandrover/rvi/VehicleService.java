@@ -32,6 +32,7 @@ class VehicleService
     private String mServiceIdentifier;
 
     private String mBundleIdentifier;
+
     private String mDomain;
 
     private String mNodeIdentifier;
@@ -165,6 +166,16 @@ class VehicleService
      */
     String getBundleIdentifier() {
         return mBundleIdentifier;
+    }
+
+
+    /**
+     * Gets the domain.
+     *
+     * @return the domain
+     */
+    String getDomain() {
+        return mDomain;
     }
 
     /**

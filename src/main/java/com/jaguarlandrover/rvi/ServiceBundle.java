@@ -30,6 +30,7 @@ public class ServiceBundle
     private final static String TAG = "RVI:ServiceBundle";
 
     private String mBundleIdentifier;
+
     private String mDomain;
     private String mLocalNodeIdentifier;
 
@@ -62,7 +63,8 @@ public class ServiceBundle
         String regex = "^[a-zA-Z0-9_\\.]*$";
         boolean hasSpecialChar = !identifier.matches(regex);
 
-        if (hasSpecialChar) throw new IllegalArgumentException("Input parameter contains a non-alphanumeric/underscore character.");
+        if (hasSpecialChar)
+            throw new IllegalArgumentException("Input parameter contains a non-alphanumeric/underscore character.");
 
         return identifier;
     }
@@ -114,9 +116,6 @@ public class ServiceBundle
         VehicleService service;
         if (null != (service = mRemoteServices.get(serviceIdentifier)))
             return service;
-
-//        if (null != (service = mRemoteServices.get("/" + serviceIdentifier)))
-//            return service;
 
         return new VehicleService(serviceIdentifier, mDomain, mBundleIdentifier, null);
     }
@@ -256,6 +255,16 @@ public class ServiceBundle
      */
     public String getBundleIdentifier() {
         return mBundleIdentifier;
+    }
+
+
+    /**
+     * Gets the domain.
+     *
+     * @return the domain
+     */
+    String getDomain() {
+        return mDomain;
     }
 
 }
