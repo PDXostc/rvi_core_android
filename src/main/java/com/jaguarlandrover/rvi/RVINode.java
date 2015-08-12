@@ -21,7 +21,6 @@ import android.util.Base64;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.UUID;
 
 import static android.content.Context.MODE_PRIVATE;
@@ -172,20 +171,20 @@ public class RVINode
     }
 
     /**
-     * Update service.
+     * Invoke service.
      *
      * @param service the service
      */
-    static void updateService(VehicleService service) {
+    static void invokeService(Service service) {
         RemoteConnectionManager.sendPacket(new DlinkReceivePacket(service));
     }
 
     private void handleReceivePacket(DlinkReceivePacket packet) {
-        VehicleService service = packet.getService();
+        Service service = packet.getService();
 
         ServiceBundle bundle = allServiceBundles.get(service.getDomain() + ":" + service.getBundleIdentifier());
         if (bundle != null)
-            bundle.serviceUpdated(service);
+            bundle.serviceInvoked(service);
     }
 
     private void handleServiceAnnouncePacket(DlinkServiceAnnouncePacket packet) {

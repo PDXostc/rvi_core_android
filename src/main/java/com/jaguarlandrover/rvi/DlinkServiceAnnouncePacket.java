@@ -44,9 +44,9 @@ class DlinkServiceAnnouncePacket extends DlinkPacket
 //     * @param services a list of @VehicleServices
 //     * @return a list of fully-qualified local service names
 //     */
-//    private ArrayList<String> getServiceFQNames(ArrayList<VehicleService> services) {
+//    private ArrayList<String> getServiceFQNames(ArrayList<Service> services) {
 //        ArrayList<String> newList = new ArrayList<>(services.size());
-//        for (VehicleService service : services)
+//        for (Service service : services)
 //            newList.add(service.getFullyQualifiedLocalServiceName());
 //
 //        return newList;

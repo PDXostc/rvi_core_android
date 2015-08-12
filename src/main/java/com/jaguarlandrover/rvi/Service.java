@@ -7,7 +7,7 @@ package com.jaguarlandrover.rvi;
  * Mozilla Public License, version 2.0. The full text of the
  * Mozilla Public License is at https://www.mozilla.org/MPL/2.0/
  *
- * File:    VehicleService.java
+ * File:    Service.java
  * Project: RVI SDK
  *
  * Created by Lilli Szafranski on 5/19/15.
@@ -25,9 +25,9 @@ import java.util.HashMap;
 /**
  * The type Vehicle service.
  */
-class VehicleService
+class Service
 {
-    private final static String TAG = "RVI:VehicleService";
+    private final static String TAG = "RVI:Service";
 
     private String mServiceIdentifier;
 
@@ -49,7 +49,7 @@ class VehicleService
      * @param bundleIdentifier the bundle identifier
      * @param prefix the service's prefix
      */
-    VehicleService(String serviceIdentifier, String domain, String bundleIdentifier, String prefix) {
+    Service(String serviceIdentifier, String domain, String bundleIdentifier, String prefix) {
         mServiceIdentifier = serviceIdentifier;
         mBundleIdentifier = bundleIdentifier;
         mDomain = domain;
@@ -61,7 +61,7 @@ class VehicleService
      *
      * @param jsonString the json string
      */
-    VehicleService(String jsonString) {
+    Service(String jsonString) {
         Log.d(TAG, "Service data: " + jsonString);
 
         Gson gson = new Gson();
