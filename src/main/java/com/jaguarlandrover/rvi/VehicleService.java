@@ -188,7 +188,7 @@ class VehicleService
     }
 
     /**
-     * Gets timeout.
+     * Gets the timeout. This value is the timeout, in milliseconds, from the epoch.
      *
      * @return the timeout
      */
@@ -197,11 +197,11 @@ class VehicleService
     }
 
     /**
-     * Sets timeout.
+     * Sets the timeout.
      *
-     * @param timeout the timeout
+     * @param timeout the timeout in milliseconds from the epoch.
      */
     void setTimeout(Long timeout) {
-        mTimeout =  System.currentTimeMillis() + timeout;
+        mTimeout = timeout;
     }
 }

@@ -202,13 +202,13 @@ public class ServiceBundle
      *
      * @param serviceIdentifier the service identifier
      * @param parameters the parameters
-     * @param timeout the timeout
+     * @param timeout the timeout, in milliseconds. This is added to the current system time.
      */
     public void updateService(String serviceIdentifier, Object parameters, Long timeout) {
         VehicleService service = getRemoteService(serviceIdentifier);
 
         service.setParameters(parameters);
-        service.setTimeout(timeout);
+        service.setTimeout(System.currentTimeMillis() + timeout);
 
         if (service.hasNodeIdentifier())
             RVINode.updateService(service);
