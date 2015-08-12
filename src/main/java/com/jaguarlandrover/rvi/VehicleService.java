@@ -71,9 +71,9 @@ class VehicleService
         if (serviceParts.length != 5) return;
 
         mDomain = serviceParts[0];
-        mNodeIdentifier = "/" + serviceParts[1] + "/" + serviceParts[2];
-        mBundleIdentifier = "/" + serviceParts[3];
-        mServiceIdentifier = "/" + serviceParts[4];
+        mNodeIdentifier = serviceParts[1] + "/" + serviceParts[2];
+        mBundleIdentifier = serviceParts[3];
+        mServiceIdentifier = serviceParts[4];
 
         // TODO: Why are parameters arrays of object, not just an object? This should probably get fixed everywhere.
         if  (jsonHash.get("parameters").getClass().equals(ArrayList.class))
@@ -115,7 +115,7 @@ class VehicleService
      * @return the fully qualified service name
      */
     String getFullyQualifiedServiceName() {
-        return mDomain + mNodeIdentifier + mBundleIdentifier + mServiceIdentifier;
+        return mDomain + "/" + mNodeIdentifier + "/" + mBundleIdentifier + "/" + mServiceIdentifier;
     }
 
     /**

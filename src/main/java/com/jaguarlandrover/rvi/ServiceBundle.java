@@ -16,8 +16,10 @@ package com.jaguarlandrover.rvi;
 
 import android.content.Context;
 
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.regex.Pattern;
 
 
 /**
@@ -53,17 +55,41 @@ public class ServiceBundle
 
     private ServiceBundleListener mListener;
 
+    private String validated(String identifier) {
+        if (identifier == null) throw new IllegalArgumentException("Input parameter can't be null.");
+        if (identifier.equals("")) throw new IllegalArgumentException("Input parameter can't be an empty string.");
+
+        String regex = "^[a-zA-Z0-9_\\.]*$";
+        boolean hasSpecialChar = !identifier.matches(regex);
+
+        if (hasSpecialChar) throw new IllegalArgumentException("Input parameter contains a non-alphanumeric/underscore character.");
+
+        return identifier;
+    }
+
     /**
      * Instantiates a new Service bundle.
      *
-     * @param context the Application context
-     * @param domain the domain portion of the RVI node's prefix (e.g., "jlr.com")
-     * @param bundleIdentifier the bundle identifier (e.g., "hvac")
-     * @param servicesIdentifiers a list of the identifiers for all the local services
+     * @param context          the Application context. This value cannot be null.
+     * @param domain           the domain portion of the RVI node's prefix (e.g., "jlr.com"). The domain must only contain
+     *                         alphanumeric characters, underscores, and/or periods. No other characters or whitespace are
+     *                         allowed. This value cannot be an empty string or null.
+     * @param bundleIdentifier the bundle identifier (e.g., "hvac") The bundle identifier must only contain
+     *                         alphanumeric characters, underscores, and/or periods. No other characters or whitespace
+     *                         are allowed.  This value cannot be an empty string or null.
+     * @param servicesIdentifiers a list of the identifiers for all the local services. The service identifiers must only contain
+     *                            alphanumeric characters, underscores, and/or periods. No other characters or whitespace are allowed.
+     *                            This value cannot be an empty string or null.
+     *
+     * @exception java.lang.IllegalArgumentException Throws an exception when the context is null, or if the domain, bundle identifier
+     *                                               or any of the service identifiers are an empty string, contain special characters,
+     *                                               or are null.
      */
-    public ServiceBundle(Context context, String domain, String bundleIdentifier, ArrayList<String> servicesIdentifiers) {
-        mDomain = domain;
-        mBundleIdentifier = bundleIdentifier; // TODO: If no '/' prefix, add one
+    public ServiceBundle(Context context, String domain, String bundleIdentifier, ArrayList<String> servicesIdentifiers) throws IllegalArgumentException {
+        if (context == null) throw new InvalidParameterException("Input parameter can't be null");
+
+        mDomain = validated(domain);
+        mBundleIdentifier = validated(bundleIdentifier);
 
         mLocalNodeIdentifier = RVINode.getLocalNodeIdentifier(context);
 
@@ -73,7 +99,7 @@ public class ServiceBundle
     private HashMap<String, VehicleService> makeServices(ArrayList<String> serviceIdentifiers) {
         HashMap<String, VehicleService> services = new HashMap<>(serviceIdentifiers.size());
         for (String serviceIdentifier : serviceIdentifiers)
-            services.put(serviceIdentifier, new VehicleService(serviceIdentifier, mDomain, mBundleIdentifier, mLocalNodeIdentifier));
+            services.put(validated(serviceIdentifier), new VehicleService(serviceIdentifier, mDomain, mBundleIdentifier, mLocalNodeIdentifier));
 
         return services;
     }
@@ -89,8 +115,8 @@ public class ServiceBundle
         if (null != (service = mRemoteServices.get(serviceIdentifier)))
             return service;
 
-        if (null != (service = mRemoteServices.get("/" + serviceIdentifier)))
-            return service;
+//        if (null != (service = mRemoteServices.get("/" + serviceIdentifier)))
+//            return service;
 
         return new VehicleService(serviceIdentifier, mDomain, mBundleIdentifier, null);
     }

@@ -193,9 +193,9 @@ public class RVINode
 
             if (serviceParts.length != 5) return;
 
-            String nodeIdentifier = "/" + serviceParts[1] + "/" + serviceParts[2];
-            String bundleIdentifier = "/" + serviceParts[3];
-            String serviceIdentifier = "/" + serviceParts[4];
+            String nodeIdentifier = serviceParts[1] + "/" + serviceParts[2];
+            String bundleIdentifier = serviceParts[3];
+            String serviceIdentifier = serviceParts[4];
 
             ServiceBundle bundle = allServiceBundles.get(bundleIdentifier);
 
@@ -235,12 +235,12 @@ public class RVINode
      * @param context the application context
      * @return the local prefix
      */
-    public static String getLocalNodeIdentifier(Context context) {
+    public static String getLocalNodeIdentifier(Context context) { // TODO: There is no easy way to reset this once it's stored, is there? Maybe an app version check?
         SharedPreferences sharedPrefs = context.getSharedPreferences(SHARED_PREFS_STRING, MODE_PRIVATE);
         String localServicePrefix;
 
         if ((localServicePrefix = sharedPrefs.getString(LOCAL_SERVICE_PREFIX_STRING, null)) == null)
-            localServicePrefix = "/android/" + uuidB58String();
+            localServicePrefix = "android/" + uuidB58String();
 
         SharedPreferences.Editor editor = sharedPrefs.edit();
         editor.putString(LOCAL_SERVICE_PREFIX_STRING, localServicePrefix);
