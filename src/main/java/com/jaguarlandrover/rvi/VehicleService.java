@@ -75,11 +75,11 @@ class VehicleService
         mBundleIdentifier = "/" + serviceParts[3];
         mServiceIdentifier = "/" + serviceParts[4];
 
-        LinkedTreeMap<Object, Object> parameters = ((ArrayList<LinkedTreeMap>) jsonHash.get("parameters")).get(0);
-
-        // TODO: Why are parameters arrays of object, not just an object?
-
-        mParameters = parameters.get("value"); // TODO: This concept is HVAC specific; extract to an hvac-layer class
+        // TODO: Why are parameters arrays of object, not just an object? This should probably get fixed everywhere.
+        if  (jsonHash.get("parameters").getClass().equals(ArrayList.class))
+            mParameters = ((ArrayList<LinkedTreeMap>) jsonHash.get("parameters")).get(0);
+        else
+            mParameters = jsonHash.get("parameters");
     }
 
     /**
