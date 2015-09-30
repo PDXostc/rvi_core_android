@@ -138,7 +138,7 @@ class Service
         HashMap<String, Object> params = new HashMap<>(4);
 
         params.put("service", getFullyQualifiedServiceName());
-        params.put("parameters", Arrays.asList(mParameters));
+        params.put("parameters", mParameters);//Arrays.asList(mParameters));
         params.put("timeout", mTimeout);
         params.put("signature", "signature");
         params.put("certificate", "certificate");
