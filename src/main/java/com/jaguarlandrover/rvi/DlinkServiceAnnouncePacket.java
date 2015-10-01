@@ -113,7 +113,7 @@ class DlinkServiceAnnouncePacket extends DlinkPacket
             Gson gson = new Gson();
             HashMap jsonHash = gson.fromJson(jsonString, HashMap.class);
 
-            if  (jsonHash.get("svcs").getClass().equals(ArrayList.class))
+            if (jsonHash.get("svcs").getClass().equals(ArrayList.class))
                 mServices = ((ArrayList<String>) jsonHash.get("svcs"));
 
             //String servicesString = Jwts.parser().setSigningKey(key).parseClaimsJws(mSig).getBody().getSubject();

@@ -201,7 +201,7 @@ public class RVINode
      * @param service the service
      */
     static void invokeService(Service service) {
-        //RemoteConnectionManager.sendPacket(new DlinkReceivePacket(service));
+        RemoteConnectionManager.sendPacket(new DlinkReceivePacket(service));
     }
 
     private void handleReceivePacket(DlinkReceivePacket packet) {
