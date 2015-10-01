@@ -19,11 +19,13 @@ import android.util.Log;
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 
+import java.nio.charset.Charset;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.google.gson.internal.LinkedTreeMap;
+import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.Base64UrlCodec;
@@ -80,6 +82,19 @@ class DlinkServiceAnnouncePacket extends DlinkPacket
 
         mStatus = "av"; // TODO: Confirm what this is/where is comes from
         mServices = services;//getServiceFQNames(services);
+
+        HashMap jsonHash = new HashMap();
+        jsonHash.put("stat", "av");
+        jsonHash.put("svcs", mServices);
+
+        Gson gson = new Gson();
+        String jsonString = gson.toJson(jsonHash);
+
+//        jsonString = "{\"stat\":\"av\",\"svcs\":[]}";
+
+        mSig = Jwts.builder().setPayload(jsonString).signWith(SignatureAlgorithm.RS256, KeyManager.getPrivateKey()).compact();
+
+        Log.d(TAG, "SIIIIIIIIIIIIIIIIIIIIIIIIG: " + mSig);
     }
 
     /**

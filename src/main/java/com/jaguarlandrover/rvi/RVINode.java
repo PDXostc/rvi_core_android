@@ -17,8 +17,11 @@ package com.jaguarlandrover.rvi;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Base64;
+import android.util.Log;
+import io.jsonwebtoken.impl.crypto.MacProvider;
 
 import java.nio.ByteBuffer;
+import java.security.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
@@ -32,14 +35,36 @@ public class RVINode
 {
     private final static String TAG = "RVI:RVINode";
 
-    private static RVINode ourInstance = new RVINode();
+    private static RVINode                        ourInstance       = new RVINode();
     private static HashMap<String, ServiceBundle> allServiceBundles = new HashMap<>();
 
+    private static KeyPair mKeyPair;
+
     private RVINode() {
+
+//        KeyPairGenerator keyGen;
+//        KeyPair keypair;
+//
+//        PublicKey publicKey;
+//        PrivateKey privateKey;
+//
+//        try {
+//            keyGen = KeyPairGenerator.getInstance("RSA");
+//            keyGen.initialize(4096);
+//            mKeyPair = keyGen.genKeyPair();
+//
+//            Log.d(TAG, "pub: " + mKeyPair.getPublic().toString());
+//            Log.d(TAG, "pri: " + mKeyPair.getPrivate().toString());
+//        }
+//        catch (NoSuchAlgorithmException e) {
+//            e.printStackTrace();
+//        }
+
         RemoteConnectionManager.setListener(new RemoteConnectionManagerListener()
         {
             @Override
             public void onRVIDidConnect() {
+
                 RemoteConnectionManager.sendPacket(new DlinkAuthPacket());
 
                 announceServices();
@@ -176,7 +201,7 @@ public class RVINode
      * @param service the service
      */
     static void invokeService(Service service) {
-        RemoteConnectionManager.sendPacket(new DlinkReceivePacket(service));
+        //RemoteConnectionManager.sendPacket(new DlinkReceivePacket(service));
     }
 
     private void handleReceivePacket(DlinkReceivePacket packet) {
@@ -252,4 +277,5 @@ public class RVINode
 
         return localServicePrefix;
     }
+
 }
