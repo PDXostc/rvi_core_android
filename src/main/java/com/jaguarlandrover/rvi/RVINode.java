@@ -188,6 +188,8 @@ public class RVINode
     }
 
     private void handleServiceAnnouncePacket(DlinkServiceAnnouncePacket packet) {
+        if (packet.getServices() == null) return;
+
         for (String fullyQualifiedRemoteServiceName : packet.getServices()) {
 
             String[] serviceParts = fullyQualifiedRemoteServiceName.split("/");
