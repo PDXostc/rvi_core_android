@@ -14,6 +14,7 @@ package com.jaguarlandrover.rvi;
  *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+import android.util.Base64;
 import android.util.Log;
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
@@ -155,7 +156,11 @@ class Service
         params.put("parameters", mParameters);//Arrays.asList(mParameters));
         params.put("timeout", mTimeout);
 
-        params.put("signature", Jwts.builder().setPayload(signatureString).signWith(SignatureAlgorithm.RS256, KeyManager.getPrivateKey()).compact());
+        Boolean byHand = false;
+        String jwtSignatureString = byHand ?
+                                        "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9" + "." + Base64.encodeToString(signatureString.getBytes(), Base64.URL_SAFE | Base64.NO_WRAP) + "." + "signature" :
+                                        Jwts.builder().setPayload(signatureString).signWith(SignatureAlgorithm.RS256, KeyManager.getPrivateKey()).compact();
+        params.put("signature", jwtSignatureString);
 
         return params;
     }
