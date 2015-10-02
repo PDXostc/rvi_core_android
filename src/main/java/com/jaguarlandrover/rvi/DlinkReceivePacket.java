@@ -60,9 +60,9 @@ class DlinkReceivePacket extends DlinkPacket
 
         mMod = "proto_json_rpc";
         mService = service; // TODO: With this paradigm, if one of the parameters of mService changes, mData string will still be the same.
-        //mData = Base64.encodeToString(mService.jsonString().getBytes(), Base64.DEFAULT);// TODO: Should be using Base64.URL_SAFE?
+        mData = Base64.encodeToString(mService.jsonString().getBytes(), Base64.DEFAULT);// TODO: Should be using Base64.URL_SAFE?
 
-        mSig = Jwts.builder().setPayload(mService.jsonString()).signWith(SignatureAlgorithm.RS256, KeyManager.getPrivateKey()).compact();
+        //mSig = Jwts.builder().setPayload(mService.jsonString()).signWith(SignatureAlgorithm.RS256, KeyManager.getPrivateKey()).compact();
     }
 
 //    public DlinkReceivePacket(HashMap jsonHash) {
