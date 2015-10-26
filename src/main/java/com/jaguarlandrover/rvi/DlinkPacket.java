@@ -108,7 +108,7 @@ class DlinkPacket
         mCmd = command;
 
         mTid = tidCounter++;
-        mSig = null;
+        mSig = "";
     }
 
     // TODO: 47765, probably need to remove this constructor and update tests

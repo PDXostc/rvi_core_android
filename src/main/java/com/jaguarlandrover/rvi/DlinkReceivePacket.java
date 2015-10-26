@@ -16,8 +16,6 @@ package com.jaguarlandrover.rvi;
 
 import android.util.Base64;
 import com.google.gson.annotations.SerializedName;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 
 /**
  * The type Dlink "receive" request packet. This request is used to invoke RVI services.
@@ -60,9 +58,7 @@ class DlinkReceivePacket extends DlinkPacket
 
         mMod = "proto_json_rpc";
         mService = service; // TODO: With this paradigm, if one of the parameters of mService changes, mData string will still be the same.
-        mData = Base64.encodeToString(mService.jsonString().getBytes(), Base64.NO_WRAP | Base64.URL_SAFE);//Base64.DEFAULT);// TODO: Should be using Base64.URL_SAFE?
-
-        //mSig = Jwts.builder().setPayload(mService.jsonString()).signWith(SignatureAlgorithm.RS256, KeyManager.getPrivateKey()).compact();
+        mData = Base64.encodeToString(mService.jsonString().getBytes(), Base64.DEFAULT);
     }
 
 //    public DlinkReceivePacket(HashMap jsonHash) {

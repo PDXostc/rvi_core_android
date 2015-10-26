@@ -14,23 +14,11 @@ package com.jaguarlandrover.rvi;
  *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-import android.util.Base64;
 import android.util.Log;
-import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 
-import java.nio.charset.Charset;
-import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import com.google.gson.internal.LinkedTreeMap;
-import io.jsonwebtoken.Jwt;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.impl.Base64UrlCodec;
-import io.jsonwebtoken.impl.crypto.MacProvider;
-import java.security.Key;
 
 /**
  * The type Dlink "service announce" request packet. This request is used to announce RVI node services.
@@ -78,23 +66,8 @@ class DlinkServiceAnnouncePacket extends DlinkPacket
     DlinkServiceAnnouncePacket(ArrayList<String> services) {
         super(Command.SERVICE_ANNOUNCE);
 
-        if (services == null) throw new InvalidParameterException("Service Announce Packet cannot be initialized with null services.");
-
         mStatus = "av"; // TODO: Confirm what this is/where is comes from
         mServices = services;//getServiceFQNames(services);
-
-        HashMap jsonHash = new HashMap();
-        jsonHash.put("stat", "av");
-        jsonHash.put("svcs", mServices);
-
-        Gson gson = new Gson();
-        String jsonString = gson.toJson(jsonHash);
-
-//        jsonString = "{\"stat\":\"av\",\"svcs\":[]}";
-
-        mSig = Jwts.builder().setPayload(jsonString).signWith(SignatureAlgorithm.RS256, KeyManager.getPrivateKey()).compact();
-
-        Log.d(TAG, "SIIIIIIIIIIIIIIIIIIIIIIIIG: " + mSig);
     }
 
     /**
@@ -103,24 +76,6 @@ class DlinkServiceAnnouncePacket extends DlinkPacket
      * @return the list of fully-qualified local service names
      */
     ArrayList<String> getServices() {
-
-        if (mServices == null) {
-            String sigSplit[] = mSig.split("\\.");
-            String jsonString = sigSplit[1];
-
-            jsonString = new String(Base64.decode(jsonString, Base64.DEFAULT));
-
-            Gson gson = new Gson();
-            HashMap jsonHash = gson.fromJson(jsonString, HashMap.class);
-
-            if (jsonHash.get("svcs").getClass().equals(ArrayList.class))
-                mServices = ((ArrayList<String>) jsonHash.get("svcs"));
-
-            //String servicesString = Jwts.parser().setSigningKey(key).parseClaimsJws(mSig).getBody().getSubject();
-
-            Log.d(TAG, "Decoded sig subject: " + jsonString);
-        }
-
         return mServices;
     }
 
