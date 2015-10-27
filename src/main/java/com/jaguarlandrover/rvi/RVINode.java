@@ -32,15 +32,15 @@ public class RVINode
 {
     private final static String TAG = "RVI:RVINode";
 
-    private static RVINode ourInstance = new RVINode();
-    private static HashMap<String, ServiceBundle> allServiceBundles = new HashMap<>();
+    private HashMap<String, ServiceBundle> mAllServiceBundles       = new HashMap<>();
+    private RemoteConnectionManager        mRemoteConnectionManager = new RemoteConnectionManager();
 
-    private RVINode() {
-        RemoteConnectionManager.setListener(new RemoteConnectionManagerListener()
+    public RVINode(Context context) {
+        mRemoteConnectionManager.setListener(new RemoteConnectionManagerListener()
         {
             @Override
             public void onRVIDidConnect() {
-                RemoteConnectionManager.sendPacket(new DlinkAuthPacket());
+                mRemoteConnectionManager.sendPacket(new DlinkAuthPacket());
 
                 announceServices();
 
@@ -90,8 +90,8 @@ public class RVINode
      *
      * @param listener the listener
      */
-    public static void setListener(RVINodeListener listener) {
-        ourInstance.mListener = listener;
+    public void setListener(RVINodeListener listener) {
+        /*ourInstance.*/mListener = listener;
     }
 
     /**
@@ -102,39 +102,57 @@ public class RVINode
         /**
          * Called when the local RVI node successfully connects to a remote RVI node.
          */
-        public void nodeDidConnect();
+        void nodeDidConnect();
 
         /**
          * Called when the local RVI node failed to connect to a remote RVI node.
          */
-        public void nodeDidFailToConnect();
+        void nodeDidFailToConnect();
 
         /**
          * Called when the local RVI node disconnects from a remote RVI node.
          */
-        public void nodeDidDisconnect();
+        void nodeDidDisconnect();
 
     }
 
     private RVINodeListener mListener;
 
     /**
+     * Sets the server url to the remote RVI node, when using a TCP/IP link to interface with a remote node.
+     *
+     * @param serverUrl the server url
+     */
+    public void setServerUrl(String serverUrl) {
+        mRemoteConnectionManager.setServerUrl(serverUrl);
+    }
+
+    /**
+     * Sets the server port of the remote RVI node, when using a TCP/IP link to interface with a remote node.
+     *
+     * @param serverPort the server port
+     */
+    public void setServerPort(Integer serverPort) {
+        mRemoteConnectionManager.setServerPort(serverPort);
+    }
+
+    /**
      * Tells the local RVI node to connect to the remote RVI node.
      */
-    public static void connect() {
+    public void connect() {
         // are we configured
         // connect
-        RemoteConnectionManager.connect();
+        mRemoteConnectionManager.connect();
 
     }
 
     /**
      * Tells the local RVI node to disconnect from the remote RVI node.
      */
-    public static void disconnect() {
+    public void disconnect() {
         // disconnect
 
-        RemoteConnectionManager.disconnect();
+        mRemoteConnectionManager.disconnect();
     }
 
     /**
@@ -143,9 +161,10 @@ public class RVINode
      *
      * @param bundle the bundle
      */
-    public static void addBundle(ServiceBundle bundle) {
-        RVINode.allServiceBundles.put(bundle.getDomain() + ":" + bundle.getBundleIdentifier(), bundle);
-        RVINode.announceServices();
+    public void addBundle(ServiceBundle bundle) {
+        bundle.setNode(this);
+        mAllServiceBundles.put(bundle.getDomain() + ":" + bundle.getBundleIdentifier(), bundle);
+        announceServices();
     }
 
     /**
@@ -154,20 +173,21 @@ public class RVINode
      *
      * @param bundle the bundle
      */
-    public static void removeBundle(ServiceBundle bundle) {
-        RVINode.allServiceBundles.remove(bundle.getDomain() + ":" + bundle.getBundleIdentifier());
-        RVINode.announceServices();
+    public void removeBundle(ServiceBundle bundle) {
+        bundle.setNode(null);
+        mAllServiceBundles.remove(bundle.getDomain() + ":" + bundle.getBundleIdentifier());
+        announceServices();
     }
 
     /**
      * Have the local node announce all it's available services.
      */
-    static void announceServices() {
+    void announceServices() {
         ArrayList<String> allServices = new ArrayList<>();
-        for (ServiceBundle bundle : allServiceBundles.values())
+        for (ServiceBundle bundle : mAllServiceBundles.values())
             allServices.addAll(bundle.getFullyQualifiedLocalServiceNames());
 
-        RemoteConnectionManager.sendPacket(new DlinkServiceAnnouncePacket(allServices));
+        mRemoteConnectionManager.sendPacket(new DlinkServiceAnnouncePacket(allServices));
     }
 
     /**
@@ -175,14 +195,14 @@ public class RVINode
      *
      * @param service the service
      */
-    static void invokeService(Service service) {
-        RemoteConnectionManager.sendPacket(new DlinkReceivePacket(service));
+    void invokeService(Service service) {
+        mRemoteConnectionManager.sendPacket(new DlinkReceivePacket(service));
     }
 
     private void handleReceivePacket(DlinkReceivePacket packet) {
         Service service = packet.getService();
 
-        ServiceBundle bundle = allServiceBundles.get(service.getDomain() + ":" + service.getBundleIdentifier());
+        ServiceBundle bundle = mAllServiceBundles.get(service.getDomain() + ":" + service.getBundleIdentifier());
         if (bundle != null)
             bundle.serviceInvoked(service);
     }
@@ -199,7 +219,7 @@ public class RVINode
             String bundleIdentifier = serviceParts[3];
             String serviceIdentifier = serviceParts[4];
 
-            ServiceBundle bundle = allServiceBundles.get(domain + ":" + bundleIdentifier);
+            ServiceBundle bundle = mAllServiceBundles.get(domain + ":" + bundleIdentifier);
 
             if (bundle != null)
                 bundle.addRemoteService(serviceIdentifier, nodeIdentifier);
