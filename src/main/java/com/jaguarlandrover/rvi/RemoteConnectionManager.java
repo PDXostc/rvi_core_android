@@ -23,8 +23,6 @@ public class RemoteConnectionManager
 {
     private final static String TAG = "RVI:RemoteCon...Manager";
 
-    private static RemoteConnectionManager ourInstance = new RemoteConnectionManager();
-
     private BluetoothConnection mBluetoothConnection;
     private ServerConnection    mDirectServerConnection;
 
@@ -32,7 +30,7 @@ public class RemoteConnectionManager
 
     private RemoteConnectionManagerListener mListener;
 
-    private RemoteConnectionManager() {
+    RemoteConnectionManager() {
         mDataParser = new DlinkPacketParser(new DlinkPacketParser.DlinkPacketParserListener()
         {
             @Override
@@ -84,10 +82,10 @@ public class RemoteConnectionManager
     /**
      * Connect the local RVI node to the remote RVI node.
      */
-    static void connect() {
-        ourInstance.closeConnections();
+    void connect() {
+        closeConnections();
 
-        RemoteConnectionInterface remoteConnection = ourInstance.selectEnabledRemoteConnection();
+        RemoteConnectionInterface remoteConnection = selectEnabledRemoteConnection();
 
         if (remoteConnection == null) return;
 
@@ -97,9 +95,9 @@ public class RemoteConnectionManager
     /**
      * Disconnect the local RVI node from the remote RVI node
      */
-    static void disconnect() {
-        ourInstance.closeConnections();
-        ourInstance.mDataParser.clear();
+    void disconnect() {
+        closeConnections();
+        mDataParser.clear();
     }
 
     /**
@@ -107,10 +105,10 @@ public class RemoteConnectionManager
      *
      * @param dlinkPacket the dlink packet
      */
-    static void sendPacket(DlinkPacket dlinkPacket) {
+    void sendPacket(DlinkPacket dlinkPacket) {
         Log.d(TAG, Util.getMethodName());
 
-        RemoteConnectionInterface remoteConnection = ourInstance.selectConnectedRemoteConnection();
+        RemoteConnectionInterface remoteConnection = selectConnectedRemoteConnection();
 
         if (remoteConnection == null) return; // TODO: Implement a cache to send out stuff after a connection has been established
 
@@ -120,9 +118,8 @@ public class RemoteConnectionManager
     private RemoteConnectionInterface selectConnectedRemoteConnection() {
         if (mDirectServerConnection.isEnabled() && mDirectServerConnection.isConnected())
             return mDirectServerConnection;
-        if (mBluetoothConnection.isEnabled() && mBluetoothConnection.isConnected()) {
+        if (mBluetoothConnection.isEnabled() && mBluetoothConnection.isConnected())
             return mBluetoothConnection;
-        }
 
         return null;
     }
@@ -130,9 +127,8 @@ public class RemoteConnectionManager
     private RemoteConnectionInterface selectEnabledRemoteConnection() { // TODO: This is going to be buggy if a connection is enabled but not connected; the other connections won't have connected
         if (mDirectServerConnection.isEnabled())                        // TODO: Rewrite better 'choosing' code
             return mDirectServerConnection;
-        if (mBluetoothConnection.isEnabled()) {
+        if (mBluetoothConnection.isEnabled())
             return mBluetoothConnection;
-        }
 
         return null;
     }
@@ -147,8 +143,8 @@ public class RemoteConnectionManager
      *
      * @param serverUrl the server url
      */
-    public static void setServerUrl(String serverUrl) {
-        RemoteConnectionManager.ourInstance.mDirectServerConnection.setServerUrl(serverUrl);
+    void setServerUrl(String serverUrl) {
+        /*RemoteConnectionManager.ourInstance.*/mDirectServerConnection.setServerUrl(serverUrl);
     }
 
     /**
@@ -156,8 +152,8 @@ public class RemoteConnectionManager
      *
      * @param serverPort the server port
      */
-    public static void setServerPort(Integer serverPort) {
-        RemoteConnectionManager.ourInstance.mDirectServerConnection.setServerPort(serverPort);
+    void setServerPort(Integer serverPort) {
+        /*RemoteConnectionManager.ourInstance.*/mDirectServerConnection.setServerPort(serverPort);
     }
 
 //    /**
@@ -174,7 +170,7 @@ public class RemoteConnectionManager
      *
      * @param listener the listener
      */
-    static void setListener(RemoteConnectionManagerListener listener) {
-        RemoteConnectionManager.ourInstance.mListener = listener;
+    void setListener(RemoteConnectionManagerListener listener) {
+        /*RemoteConnectionManager.ourInstance.*/mListener = listener;
     }
 }

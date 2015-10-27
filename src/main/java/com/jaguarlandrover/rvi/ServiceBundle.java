@@ -38,6 +38,7 @@ public class ServiceBundle
     private HashMap<String, Service> mRemoteServices = new HashMap<>();
 
     private HashMap<String, Service> mPendingServiceInvocations = new HashMap<>();
+    private RVINode mNode;
 
     /**
      * The Service bundle listener interface.
@@ -127,7 +128,7 @@ public class ServiceBundle
         if (!mLocalServices.containsKey(serviceIdentifier))
             mLocalServices.put(serviceIdentifier, new Service(serviceIdentifier, mDomain, mBundleIdentifier, mLocalNodeIdentifier));
 
-        RVINode.announceServices();
+        if (mNode != null) mNode.announceServices();
     }
 
     /**
@@ -138,7 +139,7 @@ public class ServiceBundle
         for (String serviceIdentifier : serviceIdentifiers)
             mLocalServices.put(serviceIdentifier, new Service(serviceIdentifier, mDomain, mBundleIdentifier, mLocalNodeIdentifier));
 
-        RVINode.announceServices();
+        if (mNode != null) mNode.announceServices();
     }
 
     /**
@@ -148,7 +149,7 @@ public class ServiceBundle
     public void removeLocalService(String serviceIdentifier) {
         mLocalServices.remove(serviceIdentifier);
 
-        RVINode.announceServices();
+        if (mNode != null) mNode.announceServices();
     }
 
     /**
@@ -157,7 +158,7 @@ public class ServiceBundle
     public void removeAllLocalServices() {
         mLocalServices.clear();
 
-        RVINode.announceServices();
+        if (mNode != null) mNode.announceServices();
     }
 
     /**
@@ -174,7 +175,7 @@ public class ServiceBundle
         if (pendingServiceInvocation != null) {
             if (pendingServiceInvocation.getTimeout() >= System.currentTimeMillis()) {
                 pendingServiceInvocation.setNodeIdentifier(remoteNodeIdentifier);
-                RVINode.invokeService(pendingServiceInvocation);
+                /*RVINode*/mNode.invokeService(pendingServiceInvocation);
             }
 
             mPendingServiceInvocations.remove(serviceIdentifier);
@@ -209,8 +210,8 @@ public class ServiceBundle
         service.setParameters(parameters);
         service.setTimeout(System.currentTimeMillis() + timeout);
 
-        if (service.hasNodeIdentifier())
-            RVINode.invokeService(service);
+        if (service.hasNodeIdentifier() && mNode != null) // TODO: Check the logic here
+            /*RVINode*/ mNode.invokeService(service);
         else
             mPendingServiceInvocations.put(serviceIdentifier, service);
     }
@@ -256,7 +257,6 @@ public class ServiceBundle
         return mBundleIdentifier;
     }
 
-
     /**
      * Gets the domain.
      *
@@ -266,4 +266,10 @@ public class ServiceBundle
         return mDomain;
     }
 
+    void setNode(RVINode node) {
+        mNode = node;
+    }
+//    RVINode getNode() {
+//        return mNode;
+//    }
 }
