@@ -17,6 +17,8 @@ package com.jaguarlandrover.rvi;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import javax.net.SocketFactory;
+import javax.net.ssl.*;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -37,7 +39,7 @@ class ServerConnection implements RemoteConnectionInterface
     /**
      * The socket.
      */
-    private Socket mSocket;
+    private SSLSocket mSocket;
 
     @Override
     public void sendRviRequest(DlinkPacket dlinkPacket) {
@@ -71,14 +73,13 @@ class ServerConnection implements RemoteConnectionInterface
                 mSocket.close();
 
             mSocket = null;
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
         if (mRemoteConnectionListener != null && trigger != null) mRemoteConnectionListener.onRemoteConnectionDidDisconnect(trigger);
     }
-
+    
     @Override
     public void setRemoteConnectionListener(RemoteConnectionListener remoteConnectionListener) {
         mRemoteConnectionListener = remoteConnectionListener;
@@ -117,7 +118,12 @@ class ServerConnection implements RemoteConnectionInterface
         protected Throwable doInBackground(Void... params) {
 
             try {
-                mSocket = new Socket(dstAddress, dstPort);
+                SocketFactory sf = SSLSocketFactory.getDefault();
+//                SSLSocket        socket = (SSLSocket) sf.createSocket("gmail.com", 443);
+//                HostnameVerifier hv     = HttpsURLConnection.getDefaultHostnameVerifier();
+//                SSLSession       s      = socket.getSession();
+
+                mSocket = (SSLSocket) sf.createSocket(dstAddress, dstPort);//new Socket(dstAddress, dstPort);
 
             } catch (Exception e) {
                 e.printStackTrace();

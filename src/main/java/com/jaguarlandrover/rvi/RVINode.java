@@ -121,9 +121,6 @@ public class RVINode
          * Called when the local RVI node disconnects from a remote RVI node.
          */
         void nodeDidDisconnect(Throwable trigger);
-
-
-
     }
 
     private RVINodeListener mListener;
