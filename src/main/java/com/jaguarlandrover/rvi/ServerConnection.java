@@ -19,11 +19,8 @@ import android.util.Log;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.*;
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.Socket;
+import java.io.*;
+import java.security.*;
 
 /**
  * The TCP/IP server @RemoteConnectionInterface implementation
@@ -33,8 +30,11 @@ class ServerConnection implements RemoteConnectionInterface
     private final static String TAG = "RVI:ServerConnection";
     private RemoteConnectionListener mRemoteConnectionListener;
 
-    private String  mServerUrl;
-    private Integer mServerPort;
+    private String   mServerUrl;
+    private Integer  mServerPort;
+    private KeyStore mClientKeyStore;
+    private KeyStore mServerKeyStore;
+    private String   mClientKeyStorePassword;
 
     /**
      * The socket.
@@ -56,7 +56,7 @@ class ServerConnection implements RemoteConnectionInterface
 
     @Override
     public boolean isConfigured() {
-        return !(mServerUrl == null || mServerUrl.isEmpty() || mServerPort == 0);
+        return !(mServerUrl == null || mServerUrl.isEmpty() || mServerPort == 0 || mClientKeyStore == null || mServerKeyStore == null);
     }
 
     @Override
@@ -70,16 +70,16 @@ class ServerConnection implements RemoteConnectionInterface
     public void disconnect(Throwable trigger) {
         try {
             if (mSocket != null)
-                mSocket.close();
+                mSocket.close(); // TODO: Put on background thread (and probably do in BluetoothConnection too)
 
             mSocket = null;
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
         if (mRemoteConnectionListener != null && trigger != null) mRemoteConnectionListener.onRemoteConnectionDidDisconnect(trigger);
     }
-    
+
     @Override
     public void setRemoteConnectionListener(RemoteConnectionListener remoteConnectionListener) {
         mRemoteConnectionListener = remoteConnectionListener;
@@ -88,7 +88,7 @@ class ServerConnection implements RemoteConnectionInterface
     private void connectSocket() {
         Log.d(TAG, "Connecting the socket: " + mServerUrl + ":" + mServerPort);
 
-        ConnectTask connectAndAuthorizeTask = new ConnectTask(mServerUrl, mServerPort);
+        ConnectTask connectAndAuthorizeTask = new ConnectTask(mServerUrl, mServerPort, mServerKeyStore, mClientKeyStore, mClientKeyStorePassword);
         connectAndAuthorizeTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
@@ -97,33 +97,88 @@ class ServerConnection implements RemoteConnectionInterface
         /**
          * The destination address.
          */
-        String dstAddress;
+        String   dstAddress;
         /**
          * The destination port.
          */
-        int    dstPort;
+        int      dstPort;
+        /**
+         * The key store of the server certs.
+         */
+        KeyStore serverKeyStore;
+        /**
+         * The key store of the client certs.
+         */
+        KeyStore clientKeyStore;
+        /**
+         * The key store password of the client certs.
+         */
+        String   clientKeyStorePassword;
 
         /**
          * Instantiates a new Connect task.
-         *
          * @param addr the addr
          * @param port the port
+         * @param sks the server key store
+         * @param cks the client key store
+         * @param cksPass the client key store password
          */
-        ConnectTask(String addr, int port) {
+        ConnectTask(String addr, int port, KeyStore sks, KeyStore cks, String cksPass) {
             dstAddress = addr;
             dstPort = port;
+            clientKeyStore = cks;
+            serverKeyStore = sks;
+            clientKeyStorePassword = cksPass;
         }
+
+
+//        private KeyStore getKeyStore(String fileName, String type, String password) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException { // type = "jks"?
+////            AssetManager assetManager = getAssetManager();
+////            AssetFileDescriptor fileDescriptor = assetManager.openFd(fileName);
+////            FileInputStream stream = fileDescriptor.createInputStream();
+//            File file = new File(fileName);
+//            FileInputStream fis = new FileInputStream(file);
+//            KeyStore ks = KeyStore.getInstance(type);
+//            ks.load(fis, password.toCharArray());
+//            fis.close(); // Now we initialize the TrustManagerFactory with this KeyStore
+//
+//            return ks;
+//        }
+//
+//        private KeyManager[] getKeyManagers(String keyStoreFileName, String keyStoreType, String keyStorePassword) throws IOException, GeneralSecurityException { // First, get the default KeyManagerFactory.
+//            String alg = KeyManagerFactory.getDefaultAlgorithm();
+//            KeyManagerFactory kmFact = KeyManagerFactory.getInstance(alg); // Next, set up the KeyStore to use. We need to load the file into // a KeyStore instance.
+//            kmFact.init(getKeyStore(keyStoreFileName, keyStoreType, keyStorePassword), keyStorePassword.toCharArray()); // And now get the TrustManagers
+//            KeyManager[] kms = kmFact.getKeyManagers();
+//
+//            return kms;
+//        }
+
 
         @Override
         protected Throwable doInBackground(Void... params) {
 
             try {
-                SocketFactory sf = SSLSocketFactory.getDefault();
-//                SSLSocket        socket = (SSLSocket) sf.createSocket("gmail.com", 443);
-//                HostnameVerifier hv     = HttpsURLConnection.getDefaultHostnameVerifier();
-//                SSLSession       s      = socket.getSession();
+                Log.d(TAG, "Creating socket factory");
 
-                mSocket = (SSLSocket) sf.createSocket(dstAddress, dstPort);//new Socket(dstAddress, dstPort);
+                String trustManagerAlgorithm = "X509";//TrustManagerFactory.getDefaultAlgorithm();
+                TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(trustManagerAlgorithm);
+                trustManagerFactory.init(serverKeyStore);
+
+                String keyManagerAlgorithm = "X509";//KeyManagerFactory.getDefaultAlgorithm();
+                KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(keyManagerAlgorithm);
+                keyManagerFactory.init(clientKeyStore, clientKeyStorePassword.toCharArray());
+
+                SSLContext context = SSLContext.getInstance("TLS");
+                context.init(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(), null);
+
+                SocketFactory sf = context.getSocketFactory();
+
+                Log.d(TAG, "Creating ssl socket");
+
+                mSocket = (SSLSocket) sf.createSocket(dstAddress, dstPort);
+
+                Log.d(TAG, "Creating ssl socket complete");
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -258,5 +313,29 @@ class ServerConnection implements RemoteConnectionInterface
      */
     void setServerPort(Integer serverPort) {
         mServerPort = serverPort;
+    }
+
+    /**
+     * Sets the key store of the server certs
+     * @param serverKeyStore the key store with the trusted server's cert used in TLS handshake
+     */
+    public void setServerKeyStore(KeyStore serverKeyStore) {
+        mServerKeyStore = serverKeyStore;
+    }
+
+    /**
+     * Sets the key store of the client certs
+     * @param clientKeyStore the key store with the trusted client's cert used in TLS handshake
+     */
+    public void setClientKeyStore(KeyStore clientKeyStore) {
+        mClientKeyStore = clientKeyStore;
+    }
+
+    /**
+     * Sets the key store of the client certs
+     * @param clientKeyStorePassword the password of the key store with the trusted client's cert
+     */
+    void setClientKeyStorePassword(String clientKeyStorePassword) {
+        mClientKeyStorePassword = clientKeyStorePassword;
     }
 }
