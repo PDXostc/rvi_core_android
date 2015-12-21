@@ -61,8 +61,8 @@ class ServerConnection implements RemoteConnectionInterface
 
     @Override
     public void connect() {
-        if (isConnected()) disconnect(null);
-
+        if (isConnected()) disconnect(null); // TODO: If relaunching, but not rebuilding, this may already be connected, in which case disconnecting may be unnecessary?
+                                             // TODO: Figure out exactly what the right behavior should be in this case
         connectSocket();
     }
 
