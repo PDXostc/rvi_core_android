@@ -47,7 +47,8 @@ public class RVINode
 
                 mRemoteConnectionManager.sendPacket(new DlinkAuthPacket());
 
-                announceServices();
+                // TODO: ULF - Uncomment this line to send the service announce
+                //announceServices();
 
                 if (mListener != null) mListener.nodeDidConnect();
             }
