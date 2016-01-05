@@ -17,6 +17,7 @@ package com.jaguarlandrover.rvi;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Base64;
+import android.util.Log;
 
 import java.nio.ByteBuffer;
 import java.security.KeyStore;
@@ -84,7 +85,10 @@ public class RVINode
             }
 
             @Override
-            public void onRVIDidSendPacket() {
+            public void onRVIDidSendPacket(DlinkPacket packet) {
+                Log.d(TAG, "onRVIDidSendPacket");
+                if (packet.getClass().equals(DlinkAuthPacket.class))
+                    announceServices();
 
             }
 

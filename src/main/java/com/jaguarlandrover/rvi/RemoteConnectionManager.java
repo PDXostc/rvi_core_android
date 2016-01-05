@@ -74,8 +74,8 @@ public class RemoteConnectionManager
             }
 
             @Override
-            public void onDidSendDataToRemoteConnection() {
-                if (mListener != null) mListener.onRVIDidSendPacket();
+            public void onDidSendDataToRemoteConnection(DlinkPacket packet) {
+                if (mListener != null) mListener.onRVIDidSendPacket(packet);
             }
 
             @Override
