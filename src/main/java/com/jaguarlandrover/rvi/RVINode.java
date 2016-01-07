@@ -87,8 +87,8 @@ public class RVINode
             @Override
             public void onRVIDidSendPacket(DlinkPacket packet) {
                 Log.d(TAG, "onRVIDidSendPacket");
-                if (packet.getClass().equals(DlinkAuthPacket.class))
-                    announceServices();
+                //if (packet.getClass().equals(DlinkAuthPacket.class))
+                    //announceServices();
 
             }
 
