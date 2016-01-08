@@ -37,40 +37,42 @@ public class RVINode
     private HashMap<String, ServiceBundle> mAllServiceBundles       = new HashMap<>();
     private RemoteConnectionManager        mRemoteConnectionManager = new RemoteConnectionManager();
 
-//    private boolean mConnected = false;
+    private boolean mIsConnected = false;
 
     public RVINode(Context context) {
         mRemoteConnectionManager.setListener(new RemoteConnectionManagerListener()
         {
             @Override
             public void onRVIDidConnect() {
-//                mConnected = true;
+                Log.d(TAG, Util.getMethodName());
+
+                mIsConnected = true;
+                if (mListener != null) mListener.nodeDidConnect();
 
                 mRemoteConnectionManager.sendPacket(new DlinkAuthPacket());
-
-                // TODO: ULF - Uncomment this line to send the service announce
-                //announceServices();
-
-                if (mListener != null) mListener.nodeDidConnect();
             }
 
             @Override
             public void onRVIDidFailToConnect(Throwable error) {
-//                mConnected = false;
+                Log.d(TAG, Util.getMethodName() + ": " + ((error == null) ? "(null)" : error.getLocalizedMessage()));
 
+                mIsConnected = false;
                 if (mListener != null) mListener.nodeDidFailToConnect(error);
             }
 
             @Override
             public void onRVIDidDisconnect(Throwable trigger) {
-//                mConnected = false;
+                Log.d(TAG, Util.getMethodName() + ": " + ((trigger == null) ? "(null)" : trigger.getLocalizedMessage()));
 
+                mIsConnected = false;
                 if (mListener != null) mListener.nodeDidDisconnect(trigger);
             }
 
             @Override
             public void onRVIDidReceivePacket(DlinkPacket packet) {
                 if (packet == null) return;
+
+                Log.d(TAG, Util.getMethodName() + ": " + packet.getClass().toString());
 
                 if (packet.getClass().equals(DlinkReceivePacket.class)) {
                     handleReceivePacket((DlinkReceivePacket) packet);
@@ -86,15 +88,16 @@ public class RVINode
 
             @Override
             public void onRVIDidSendPacket(DlinkPacket packet) {
-                Log.d(TAG, "onRVIDidSendPacket");
+                if (packet == null) return;
+
+                Log.d(TAG, Util.getMethodName() + ": " + packet.getClass().toString());
                 if (packet.getClass().equals(DlinkAuthPacket.class))
                     announceServices();
-
             }
 
             @Override
             public void onRVIDidFailToSendPacket(Throwable error) {
-
+                Log.d(TAG, Util.getMethodName() + ": " + ((error == null) ? "(null)" : error.getLocalizedMessage()));
             }
         });
     }
@@ -198,9 +201,9 @@ public class RVINode
         /*RemoteConnectionManager.ourInstance.*/mRemoteConnectionManager.setBluetoothChannel(channel);
     }
 
-//    public boolean isConnected() {
-//        return mConnected;
-//    }
+    public boolean isConnected() {
+        return mIsConnected;
+    }
 
     private void connect(RemoteConnectionManager.ConnectionType type) {
         mRemoteConnectionManager.connect(type);//, RemoteConnection.Status.NA, RemoteConnection.Descriptor.NONE));

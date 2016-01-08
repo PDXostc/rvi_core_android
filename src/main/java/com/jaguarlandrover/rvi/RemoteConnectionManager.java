@@ -120,7 +120,9 @@ public class RemoteConnectionManager
      * @param dlinkPacket the dlink packet
      */
     void sendPacket(DlinkPacket dlinkPacket) {
-        Log.d(TAG, Util.getMethodName());
+        if (dlinkPacket == null) return;
+
+        Log.d(TAG, Util.getMethodName() + ": " + dlinkPacket.getClass().toString());
 
 //        RemoteConnectionInterface remoteConnection = selectConnectedRemoteConnection();
 //
@@ -199,7 +201,7 @@ public class RemoteConnectionManager
      * @param clientKeyStore the server certificate key store
      * @param serverKeyStore the server certificate key store
      */
-    public void setKeyStores(KeyStore serverKeyStore, KeyStore clientKeyStore, String clientKeyStorePassword) {
+    void setKeyStores(KeyStore serverKeyStore, KeyStore clientKeyStore, String clientKeyStorePassword) {
         mDirectServerConnection.setServerKeyStore(serverKeyStore);
         mDirectServerConnection.setClientKeyStore(clientKeyStore);
         mDirectServerConnection.setClientKeyStorePassword(clientKeyStorePassword);
