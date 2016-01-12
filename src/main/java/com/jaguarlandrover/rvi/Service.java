@@ -149,10 +149,11 @@ class Service
         HashMap<String, Object> params = new HashMap<>(4);
 
         params.put("service", getFullyQualifiedServiceName());
-        params.put("parameters", Arrays.asList(mParameters));
+        params.put("parameters", mParameters);//Arrays.asList(mParameters));
         params.put("timeout", mTimeout);
-        params.put("signature", "signature");
-        params.put("certificate", "certificate");
+        params.put("tid", 1); // TODO: Please tell me we can not have this here
+        //params.put("signature", "signature");
+        //params.put("certificate", "certificate");
 
         return params;
     }
@@ -178,7 +179,6 @@ class Service
     String getBundleIdentifier() {
         return mBundleIdentifier;
     }
-
 
     /**
      * Gets the domain.
