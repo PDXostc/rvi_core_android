@@ -16,6 +16,7 @@ package com.jaguarlandrover.rvi;
 
 import android.util.Log;
 import com.google.gson.Gson;
+import com.google.gson.annotations.SerializedName;
 import com.google.gson.internal.LinkedTreeMap;
 
 import java.util.ArrayList;
@@ -29,17 +30,26 @@ class Service
 {
     private final static String TAG = "RVI:Service";
 
-    private String mServiceIdentifier;
+    @SerializedName("service")
+    private String mJsonService = null;
 
-    private String mBundleIdentifier;
+    @SerializedName("parameters")
+    private Object mJsonParameters = null;
 
-    private String mDomain;
+    private String mServiceIdentifier = null;
 
-    private String mNodeIdentifier;
+    private String mBundleIdentifier = null;
 
-    private Object mParameters;
+    private String mDomain = null;
 
+    private String mNodeIdentifier = null;
+
+    private Object mParameters = null;
+
+    @SerializedName("timeout")
     private Long mTimeout;
+
+    Service() {}
 
     /**
      * Instantiates a new Vehicle service.
@@ -54,6 +64,8 @@ class Service
         mBundleIdentifier = bundleIdentifier;
         mDomain = domain;
         mNodeIdentifier = prefix;
+
+        mJsonService = getFullyQualifiedServiceName();
     }
 
     HashMap unwrap(ArrayList<LinkedTreeMap> parameters) {
@@ -65,18 +77,33 @@ class Service
 
         return unwrapped;
     }
-    /**
-     * Instantiates a new Vehicle service.
-     *
-     * @param jsonString the json string
-     */
-    Service(String jsonString) {
-        Log.d(TAG, "Service data: " + jsonString);
 
-        Gson gson = new Gson();
-        HashMap jsonHash = gson.fromJson(jsonString, HashMap.class);
+    /* If the Service object was deserialized from json, mParameters field might not yet have been unwrapped, but the mJsonParameters
+       field will be set. If this is the case, unwrap the mJsonParameters field into something more easily consumable and set mParameters.
+       We only have the intermediary value here, because RVI sends parameters as a _list_ of single-kvpair objects, instead of one
+       multi-kvpair object. This gives up the opportunity to unwrap the list into an object. */
+    private Boolean shouldParseParameters() {
+        return mJsonParameters != null && mParameters == null;
+    }
 
-        String[] serviceParts = ((String) jsonHash.get("service")).split("/");
+    private void parseParamters() {
+        // TODO: Why are parameters arrays of object, not just an object? This should probably get fixed everywhere.
+        if (mJsonParameters.getClass().equals(ArrayList.class) && ((ArrayList<LinkedTreeMap>)mJsonParameters).size() == 1)
+            mParameters = ((ArrayList<LinkedTreeMap>) mJsonParameters).get(0);
+        else if (mJsonParameters.getClass().equals(ArrayList.class) && ((ArrayList<LinkedTreeMap>)mJsonParameters).size() > 1)
+            mParameters = unwrap((ArrayList<LinkedTreeMap>) mJsonParameters);
+        else
+            mParameters = mJsonParameters;
+    }
+
+    /* If the Service object was deserialized from json, some of its fields might not be set, but the mJsonService field will be set.
+       If this is the case, parse out the mJsonService field into its parts and set the rest of the fields. */
+    private Boolean shouldParseServiceName() {
+        return mJsonService != null && (mDomain == null || mNodeIdentifier == null || mBundleIdentifier == null || mServiceIdentifier == null);
+    }
+
+    private void parseFullyQualifiedServiceName() {
+        String[] serviceParts = mJsonService.split("/");
 
         if (serviceParts.length != 5) return;
 
@@ -84,41 +111,6 @@ class Service
         mNodeIdentifier = serviceParts[1] + "/" + serviceParts[2];
         mBundleIdentifier = serviceParts[3];
         mServiceIdentifier = serviceParts[4];
-
-        // TODO: Why are parameters arrays of object, not just an object? This should probably get fixed everywhere.
-        if (jsonHash.get("parameters").getClass().equals(ArrayList.class) && ((ArrayList<LinkedTreeMap>)jsonHash.get("parameters")).size() == 1)
-            mParameters = ((ArrayList<LinkedTreeMap>) jsonHash.get("parameters")).get(0);
-        else if (jsonHash.get("parameters").getClass().equals(ArrayList.class) && ((ArrayList<LinkedTreeMap>)jsonHash.get("parameters")).size() > 1)
-            mParameters = unwrap((ArrayList<LinkedTreeMap>) jsonHash.get("parameters"));
-        else
-            mParameters = jsonHash.get("parameters");
-    }
-
-    /**
-     * Gets parameters.
-     *
-     * @return the parameters
-     */
-    Object getParameters() {
-        return mParameters;
-    }
-
-    /**
-     * Sets parameters.
-     *
-     * @param parameters the parameters
-     */
-    void setParameters(Object parameters) {
-        this.mParameters = parameters;
-    }
-
-    /**
-     * Gets service identifier.
-     *
-     * @return the service identifier
-     */
-    String getServiceIdentifier() {
-        return mServiceIdentifier;
     }
 
     /**
@@ -127,6 +119,9 @@ class Service
      * @return the fully qualified service name
      */
     String getFullyQualifiedServiceName() {
+        if (shouldParseServiceName())
+            parseFullyQualifiedServiceName();
+
         return mDomain + "/" + mNodeIdentifier + "/" + mBundleIdentifier + "/" + mServiceIdentifier;
     }
 
@@ -141,43 +136,13 @@ class Service
     }
 
     /**
-     * Generate request params.
+     * Sets the node identifier portion of the fully-qualified service name
      *
-     * @return the object
+     * @param nodeIdentifier the local or remote RVI node's identifier
      */
-    Object generateRequestParams() {
-        HashMap<String, Object> params = new HashMap<>(4);
-
-        params.put("service", getFullyQualifiedServiceName());
-        params.put("parameters", mParameters);//Arrays.asList(mParameters));
-        params.put("timeout", mTimeout);
-        params.put("tid", 1); // TODO: Please tell me we can not have this here
-        //params.put("signature", "signature");
-        //params.put("certificate", "certificate");
-
-        return params;
-    }
-
-    /**
-     * Json string.
-     *
-     * @return the string
-     */
-    String jsonString() {
-        Gson gson = new Gson();
-
-        Log.d(TAG, "Service data: " + gson.toJson(generateRequestParams()));
-
-        return gson.toJson(generateRequestParams());
-    }
-
-    /**
-     * Gets bundle identifier.
-     *
-     * @return the bundle identifier
-     */
-    String getBundleIdentifier() {
-        return mBundleIdentifier;
+    void setNodeIdentifier(String nodeIdentifier) {
+        mNodeIdentifier = nodeIdentifier;
+        mJsonService = getFullyQualifiedServiceName();
     }
 
     /**
@@ -186,16 +151,55 @@ class Service
      * @return the domain
      */
     String getDomain() {
+        if (shouldParseServiceName())
+            parseFullyQualifiedServiceName();
+
         return mDomain;
     }
 
     /**
-     * Sets the node identifier portion of the fully-qualified service name
+     * Gets bundle identifier.
      *
-     * @param nodeIdentifier the local or remote RVI node's identifier
+     * @return the bundle identifier
      */
-    void setNodeIdentifier(String nodeIdentifier) {
-        mNodeIdentifier = nodeIdentifier;
+    String getBundleIdentifier() {
+        if (shouldParseServiceName())
+            parseFullyQualifiedServiceName();
+
+        return mBundleIdentifier;
+    }
+
+    /**
+     * Gets service identifier.
+     *
+     * @return the service identifier
+     */
+    String getServiceIdentifier() {
+        if (shouldParseServiceName())
+            parseFullyQualifiedServiceName();
+
+        return mServiceIdentifier;
+    }
+
+    /**
+     * Gets parameters.
+     *
+     * @return the parameters
+     */
+    Object getParameters() {
+        if (shouldParseParameters())
+            parseParamters();
+
+        return mParameters;
+    }
+
+    /**
+     * Sets parameters.
+     *
+     * @param parameters the parameters
+     */
+    void setParameters(Object parameters) {
+        this.mParameters = this.mJsonParameters = parameters;
     }
 
     /**
