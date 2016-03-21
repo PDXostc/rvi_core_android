@@ -34,6 +34,7 @@ public class RVINode
 {
     private final static String TAG = "RVI:RVINode";
 
+    private ArrayList<String>              mCredentials             = new ArrayList<>();
     private HashMap<String, ServiceBundle> mAllServiceBundles       = new HashMap<>();
     private RemoteConnectionManager        mRemoteConnectionManager = new RemoteConnectionManager();
 
@@ -49,7 +50,7 @@ public class RVINode
                 mIsConnected = true;
                 if (mListener != null) mListener.nodeDidConnect();
 
-                mRemoteConnectionManager.sendPacket(new DlinkAuthPacket());
+                mRemoteConnectionManager.sendPacket(new DlinkAuthPacket(mCredentials));
             }
 
             @Override
@@ -152,6 +153,15 @@ public class RVINode
         mRemoteConnectionManager.setServerPort(serverPort);
     }
 
+
+    /**
+      * Method to pass the SDK your app's JWT-encoded json credentials for invoking services on a remote node and receiving service invocations from a remote node.
+      *
+      * @param jwtString a jwt-encoded credentials string
+      */
+    public void addJWTCredentials(String jwtString) {
+        mCredentials.add(jwtString);
+    }
 
     /**
      * Sets the server port of the remote RVI node, when using a TCP/IP link to interface with a remote node.
