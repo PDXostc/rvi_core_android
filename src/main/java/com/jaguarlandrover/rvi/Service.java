@@ -230,6 +230,6 @@ class Service
         copy.setTimeout(this.getTimeout());
         copy.setParameters(this.getParameters());
 
-        return null;
+        return copy;
     }
 }
