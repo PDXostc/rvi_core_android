@@ -49,7 +49,7 @@ class ServerConnection implements RemoteConnectionInterface
             return;
         }
 
-        new SendDataTask(dlinkPacket).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);//, dlinkPacket.toJsonString());
+        new SendDataTask(dlinkPacket).executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);//, dlinkPacket.toJsonString());
     }
 
     @Override
@@ -277,7 +277,7 @@ class ServerConnection implements RemoteConnectionInterface
 
                 wr.writeBytes(data);
                 wr.flush();
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
 
                 return e;

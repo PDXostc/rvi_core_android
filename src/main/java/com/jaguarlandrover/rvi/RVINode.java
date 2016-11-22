@@ -88,6 +88,11 @@ public class RVINode
             }
 
             @Override
+            public void onRVIDidFailToReceivePacket(Throwable error) {
+                Log.d(TAG, Util.getMethodName() + ": " + ((error == null) ? "(null)" : error.getLocalizedMessage()));
+            }
+
+            @Override
             public void onRVIDidSendPacket(DlinkPacket packet) {
                 if (packet == null) return;
 
@@ -152,7 +157,6 @@ public class RVINode
     public void setServerPort(Integer serverPort) {
         mRemoteConnectionManager.setServerPort(serverPort);
     }
-
 
     /**
       * Method to pass the SDK your app's JWT-encoded json credentials for invoking services on a remote node and receiving service invocations from a remote node.
